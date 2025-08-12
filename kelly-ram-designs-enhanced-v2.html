@@ -494,14 +494,15 @@
         
         .item-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1.5fr auto;
-            gap: 15px;
+            grid-template-columns: 2fr 0.8fr 1fr 1fr 0.8fr 0.8fr 1fr 1fr auto;
+            gap: 12px;
             align-items: center;
-            padding: 15px;
+            padding: 12px;
             background: var(--card-bg);
             border-radius: 8px;
             margin-bottom: 10px;
             border: 1px solid var(--section-bg);
+            font-size: 14px;
         }
         
         .item-grid.header {
@@ -524,6 +525,8 @@
             z-index: 2000;
             max-width: 400px;
             width: 90%;
+            max-height: 70vh;
+            overflow-y: auto;
             text-align: center;
         }
         
@@ -616,7 +619,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="totalRevenueStat">$0</div>
-                    <div class="stat-label">Total Revenue</div>
+                    <div class="stat-label">Total Profit</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="totalPaidHoursStat">0</div>
@@ -640,7 +643,6 @@
                     <button class="btn btn-success" onclick="openNewProjectModal()" style="width: 100%; margin-bottom: 15px;">New Project</button>
                     <button class="btn btn-coral" onclick="showTab('projects')" style="width: 100%; margin-bottom: 15px;">View All Projects</button>
                     <button class="btn" onclick="addQuickEvent()" style="width: 100%; margin-bottom: 15px;">Quick Add Event</button>
-                    <button class="btn" onclick="uploadCompanyLogo()" style="width: 100%; background: var(--secondary-brand); color: white;">📁 Upload Logo</button>
                 </div>
             </div>
         </div>
@@ -770,6 +772,10 @@
                             <input type="number" id="budget" step="0.01" placeholder="Leave blank if no budget">
                         </div>
                         <div class="form-group">
+                            <label for="hourlyRate">Hourly Rate:</label>
+                            <input type="number" id="hourlyRate" step="0.01" value="75" placeholder="75.00">
+                        </div>
+                        <div class="form-group">
                             <label for="hoursPaid">Hours Paid:</label>
                             <input type="number" id="hoursPaid" step="0.25" value="10" placeholder="Hours client paid for">
                         </div>
@@ -801,7 +807,6 @@
             <div class="modal-body">
                 <div class="project-tabs">
                     <button class="project-tab active" onclick="showProjectSection('overview')">Details</button>
-                    <button class="project-tab" onclick="showProjectSection('hours')">Hours</button>
                     <button class="project-tab" onclick="showProjectSection('items')">Items</button>
                     <button class="project-tab" onclick="showProjectSection('orders')">Orders</button>
                     <button class="project-tab" onclick="showProjectSection('moodboards')">Mood Boards</button>
@@ -841,86 +846,14 @@
                             <button class="btn btn-success" onclick="addEvent()" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">📅 Add Event</button>
                             <button class="btn btn-coral" onclick="showProjectSection('invoice')" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">📄 Generate Invoice</button>
                             <button class="btn" onclick="logHours()" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">⏰ Log Hours</button>
-                            <button class="btn" onclick="addPaidHours()" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">💰 Add Paid Hours</button>
+                            <button class="btn" onclick="addPaidHours()" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px; background: linear-gradient(135deg, var(--primary-brand), var(--client-bg)); color: white;">💰 Add Paid Hours</button>
                         </div>
                     </div>
 
-                    <!-- Hour logging form brought up -->
-                    <div class="card" style="margin-bottom: 15px;">
-                        <h4 style="margin: 0 0 15px 0; font-size: 16px;">Quick Hour Entry</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
-                            <div>
-                                <label for="quickHoursToLog" style="font-size: 14px; margin-bottom: 5px;">Hours Worked:</label>
-                                <input type="number" id="quickHoursToLog" step="0.25" placeholder="e.g. 2.5" style="padding: 8px; font-size: 14px;">
-                            </div>
-                            <div>
-                                <label for="quickHoursDescription" style="font-size: 14px; margin-bottom: 5px;">Description:</label>
-                                <input type="text" id="quickHoursDescription" placeholder="Brief description" style="padding: 8px; font-size: 14px;">
-                            </div>
-                            <div>
-                                <label for="quickPaidHours" style="font-size: 14px; margin-bottom: 5px;">Paid Hours:</label>
-                                <input type="number" id="quickPaidHours" step="0.25" placeholder="Optional" style="padding: 8px; font-size: 14px;">
-                            </div>
-                            <button class="btn btn-success" onclick="submitQuickHours()" style="padding: 8px 15px; font-size: 14px;">Submit</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Collapsible sections for less critical info -->
-                    <div class="two-column" style="margin-top: 20px;">
-                        <div class="card">
-                            <h4 style="margin-top: 0; font-size: 16px;">Upcoming Events</h4>
-                            <div id="projectUpcomingEvents"></div>
-                        </div>
-                        
-                        <div class="card">
-                            <h4 style="margin-top: 0; font-size: 16px;">Additional Info</h4>
-                            <p style="margin: 8px 0; font-size: 14px;"><strong>Address:</strong> <span id="detailClientAddress"></span></p>
-                            <p style="margin: 8px 0; font-size: 14px;"><strong>Start Date:</strong> <span id="detailStartDate"></span></p>
-                            <p style="margin: 8px 0; font-size: 14px;"><strong>Hours Paid:</strong> <span id="detailHoursPaid"></span></p>
-                            <div style="margin-top: 10px;">
-                                <strong style="font-size: 14px;">Notes:</strong>
-                                <p id="detailNotes" style="color: var(--text-secondary); font-size: 14px; margin: 5px 0;"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Hours Section -->
-                <div id="hours" class="project-section">
-                    <div class="two-column">
-                        <div class="card">
-                            <h4 style="margin-top: 0;">Hours Summary</h4>
-                            <div style="text-align: center; padding: 20px; background: var(--task-bg); border-radius: 10px; margin-bottom: 15px;">
-                                <div style="font-size: 24px; font-weight: 700; color: var(--text-primary);" id="hoursWorkedDisplay">0</div>
-                                <div style="font-size: 12px; color: var(--text-secondary); text-transform: uppercase;">Hours Worked</div>
-                            </div>
-                            <div style="text-align: center; padding: 20px; background: var(--success); border-radius: 10px;">
-                                <div style="font-size: 24px; font-weight: 700; color: var(--text-primary);" id="hoursRemainingDisplay">0</div>
-                                <div style="font-size: 12px; color: var(--text-secondary); text-transform: uppercase;">Hours Remaining</div>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <h4 style="margin-top: 0;">Log Hours</h4>
-                            <div class="form-group">
-                                <label for="hoursToLog">Hours Worked:</label>
-                                <input type="number" id="hoursToLog" step="0.25" placeholder="e.g. 2.5">
-                            </div>
-                            <div class="form-group">
-                                <label for="hoursDate">Date:</label>
-                                <input type="date" id="hoursDate">
-                            </div>
-                            <div class="form-group">
-                                <label for="hoursDescription">Description:</label>
-                                <textarea id="hoursDescription" rows="3" placeholder="What did you work on?"></textarea>
-                            </div>
-                            <button class="btn btn-success" onclick="logProjectHours()">Log Hours</button>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <h4 style="margin-top: 0;">Hours Log</h4>
-                        <div id="hoursLog"></div>
+                    <!-- Upcoming Events only -->
+                    <div class="card" style="margin-top: 20px;">
+                        <h4 style="margin-top: 0; font-size: 16px;">Upcoming Events</h4>
+                        <div id="projectUpcomingEvents"></div>
                     </div>
                 </div>
 
@@ -942,7 +875,36 @@
 
                 <!-- Orders Section -->
                 <div id="orders" class="project-section">
-                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">Ready to Order Items</h3>
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">Orders & Delivery Tracking</h3>
+                    
+                    <!-- Order Summary with Progress Bar -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <h4 style="margin-top: 0;">Delivery Progress</h4>
+                        <div id="orderProgressBar" style="background: var(--section-bg); border-radius: 10px; height: 20px; margin: 10px 0; overflow: hidden;">
+                            <div id="deliveryProgress" style="height: 100%; background: linear-gradient(90deg, var(--success), var(--highlight)); border-radius: 10px; transition: width 0.3s ease; width: 0%;"></div>
+                        </div>
+                        <div id="orderSummaryText" style="text-align: center; font-size: 14px; color: var(--text-secondary);"></div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px;">
+                            <div style="text-align: center; padding: 10px; background: var(--warning); border-radius: 8px;">
+                                <div style="font-weight: bold; font-size: 18px;" id="pendingCount">0</div>
+                                <div style="font-size: 12px;">Pending</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: var(--info); border-radius: 8px;">
+                                <div style="font-weight: bold; font-size: 18px;" id="orderedCount">0</div>
+                                <div style="font-size: 12px;">Ordered</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: var(--secondary-brand); border-radius: 8px;">
+                                <div style="font-weight: bold; font-size: 18px;" id="shippedCount">0</div>
+                                <div style="font-size: 12px;">Shipped</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: var(--success); border-radius: 8px;">
+                                <div style="font-weight: bold; font-size: 18px;" id="deliveredCount">0</div>
+                                <div style="font-size: 12px;">Delivered</div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div id="readyToOrderItems">
                         <!-- Ready to order items will be populated here -->
                     </div>
@@ -1054,22 +1016,35 @@
             const totalProjects = projects.length;
             const activeProjects = projects.filter(p => p.status !== 'completed').length;
             
-            let totalRevenue = 0;
+            let totalProfit = 0;
             let totalPaidHours = 0;
             
             projects.forEach(project => {
+                const hourlyRate = project.hourlyRate || 75;
+                const hoursWorked = project.hoursWorked || 0;
+                const hoursPaid = project.hoursPaid || 0;
+                
+                // Profit from hours: paid hours * hourly rate
+                const hourProfit = hoursPaid * hourlyRate;
+                totalProfit += hourProfit;
+                
+                // Profit from items: (customer price - wholesale price) * quantity
                 if (project.sections) {
                     project.sections.forEach(section => {
                         section.items.forEach(item => {
-                            totalRevenue += item.price * item.qty;
+                            const customerPrice = item.customerPrice || item.price || 0;
+                            const wholesalePrice = item.wholesalePrice || 0;
+                            const markup = (customerPrice - wholesalePrice) * (item.qty || 1);
+                            totalProfit += markup;
                         });
                     });
                 }
-                totalPaidHours += (project.hoursPaid || 0);
+                
+                totalPaidHours += hoursPaid;
             });
 
             document.getElementById('totalProjectsStat').textContent = totalProjects;
-            document.getElementById('totalRevenueStat').textContent = `$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+            document.getElementById('totalRevenueStat').textContent = `$${totalProfit.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
             document.getElementById('totalPaidHoursStat').textContent = `${totalPaidHours.toFixed(1)}h`;
             document.getElementById('activeProjectsStat').textContent = activeProjects;
         }
@@ -1153,9 +1128,14 @@
                 card.onclick = () => openProjectDetail(project.id);
                 
                 card.innerHTML = `
-                    <div class="project-header">
+                    <div class="project-header" style="position: relative;">
                         <h3 class="project-title">${project.name}</h3>
-                        <span class="project-status status-${project.status}">${project.status}</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="project-status status-${project.status}">${project.status}</span>
+                            <button onclick="event.stopPropagation(); deleteProject(${project.id})" 
+                                    style="background: var(--error); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
+                                    title="Delete Project">×</button>
+                        </div>
                     </div>
                     <div class="project-client" style="margin-bottom: 15px; font-size: 15px; color: var(--text-secondary);">Client: ${project.client}</div>
                     
@@ -1164,10 +1144,38 @@
                             <span style="color: var(--text-secondary); font-size: 14px;">Hours Progress</span>
                             <span style="font-weight: 700; font-size: 16px; color: ${(project.hoursPaid || 0) - (project.hoursWorked || 0) > 0 ? '#27ae60' : '#e74c3c'};">Remaining: ${((project.hoursPaid || 0) - (project.hoursWorked || 0)).toFixed(1)}h</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 15px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 10px;">
                             <span style="color: var(--text-primary);"><strong>Worked:</strong> ${(project.hoursWorked || 0).toFixed(1)}h</span>
                             <span style="color: var(--text-secondary);"><strong>Paid:</strong> ${(project.hoursPaid || 0).toFixed(1)}h</span>
                         </div>
+                        
+                        <!-- Delivery Progress Section -->
+                        ${(() => {
+                            const readyItems = [];
+                            let deliveredCount = 0;
+                            if (project.sections) {
+                                project.sections.forEach(section => {
+                                    section.items.forEach(item => {
+                                        if (item.readyToOrder) {
+                                            readyItems.push(item);
+                                            if (item.orderStatus === 'delivered') deliveredCount++;
+                                        }
+                                    });
+                                });
+                            }
+                            const deliveryPercentage = readyItems.length > 0 ? (deliveredCount / readyItems.length) * 100 : 0;
+                            return readyItems.length > 0 ? `
+                                <div style="margin-top: 8px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                        <span style="color: var(--text-secondary); font-size: 12px;">Delivery Progress</span>
+                                        <span style="color: var(--text-secondary); font-size: 12px;">${deliveredCount}/${readyItems.length} delivered</span>
+                                    </div>
+                                    <div style="background: #e0e0e0; border-radius: 6px; height: 6px; overflow: hidden;">
+                                        <div style="height: 100%; background: linear-gradient(90deg, #27ae60, #2ecc71); border-radius: 6px; width: ${deliveryPercentage}%; transition: width 0.3s ease;"></div>
+                                    </div>
+                                </div>
+                            ` : '';
+                        })()}
                     </div>
                     
                     <div class="project-meta">
@@ -1217,6 +1225,7 @@
                 status: document.getElementById('projectStatus').value,
                 startDate: document.getElementById('startDate').value,
                 budget: parseFloat(document.getElementById('budget').value) || null,
+                hourlyRate: parseFloat(document.getElementById('hourlyRate').value) || 75,
                 hoursPaid: parseFloat(document.getElementById('hoursPaid').value) || 0,
                 hoursWorked: currentProject ? (currentProject.hoursWorked || 0) : 0,
                 notes: document.getElementById('projectNotes').value,
@@ -1243,6 +1252,35 @@
             updateDashboard();
             
             showCustomAlert('Project saved successfully! ✨');
+        }
+
+        function deleteProject(projectId) {
+            const project = projects.find(p => p.id === projectId);
+            if (!project) return;
+            
+            showCustomPrompt(
+                'Delete Project',
+                [
+                    { type: 'text', name: 'confirmation', label: `Type "${project.name}" to confirm deletion`, required: true, placeholder: 'Project name' }
+                ],
+                (data) => {
+                    if (data.confirmation !== project.name) {
+                        showCustomAlert('Project name does not match. Deletion cancelled.');
+                        return;
+                    }
+                    
+                    const index = projects.findIndex(p => p.id === projectId);
+                    if (index !== -1) {
+                        projects.splice(index, 1);
+                        localStorage.setItem('projects', JSON.stringify(projects));
+                        
+                        displayProjects();
+                        updateDashboard();
+                        
+                        showCustomAlert(`Project "${project.name}" deleted successfully.`);
+                    }
+                }
+            );
         }
 
         function openProjectDetail(projectId) {
@@ -1286,6 +1324,7 @@
                     { type: 'email', name: 'clientEmail', label: 'Client Email', defaultValue: currentProject.clientEmail || '' },
                     { type: 'tel', name: 'clientPhone', label: 'Client Phone', defaultValue: currentProject.clientPhone || '' },
                     { type: 'textarea', name: 'clientAddress', label: 'Client Address', defaultValue: currentProject.clientAddress || '' },
+                    { type: 'number', name: 'hourlyRate', label: 'Hourly Rate ($)', step: '0.01', defaultValue: currentProject.hourlyRate || '75', placeholder: '75.00' },
                     { type: 'select', name: 'status', label: 'Project Status', options: [
                         { value: 'consultation', text: 'Consultation' },
                         { value: 'planning', text: 'Planning' },
@@ -1303,6 +1342,7 @@
                     currentProject.clientEmail = data.clientEmail;
                     currentProject.clientPhone = data.clientPhone;
                     currentProject.clientAddress = data.clientAddress;
+                    currentProject.hourlyRate = data.hourlyRate ? parseFloat(data.hourlyRate) : 75;
                     currentProject.status = data.status;
                     currentProject.startDate = data.startDate;
                     currentProject.budget = data.budget ? parseFloat(data.budget) : null;
@@ -1377,9 +1417,13 @@
                         <div class="item-grid header">
                             <div>Item</div>
                             <div>Qty</div>
-                            <div>Price</div>
+                            <div>Wholesale Price</div>
+                            <div>Customer Unit Price</div>
+                            <div>Shipping</div>
+                            <div>Tax</div>
+                            <div>Total Customer Price</div>
                             <div>Link</div>
-                            <div>Ready?</div>
+                            <div>Ready</div>
                         </div>
                         ${section.items.map((item, itemIndex) => `
                             <div class="item-grid">
@@ -1389,41 +1433,65 @@
                                 <div>
                                     <input type="number" value="${item.qty}" min="1" 
                                            onchange="updateItemQuantity(${sectionIndex}, ${itemIndex}, this.value)"
-                                           style="width: 60px; padding: 6px 8px; border: 1px solid var(--section-bg); border-radius: 6px; text-align: center; font-size: 14px;">
+                                           style="width: 50px; padding: 4px 6px; border: 1px solid var(--section-bg); border-radius: 4px; text-align: center; font-size: 13px;">
                                 </div>
                                 <div>
-                                    <input type="number" value="${item.price}" step="0.01" min="0"
-                                           onchange="updateItemPriceInline(${sectionIndex}, ${itemIndex}, this.value)"
-                                           style="width: 90px; padding: 6px 8px; border: 1px solid var(--section-bg); border-radius: 6px; text-align: right; font-size: 14px;">
+                                    <input type="number" value="${item.wholesalePrice || 0}" step="0.01" min="0"
+                                           onchange="updateItemWholesalePrice(${sectionIndex}, ${itemIndex}, this.value)"
+                                           style="width: 70px; padding: 4px 6px; border: 1px solid var(--section-bg); border-radius: 4px; text-align: right; font-size: 13px;"
+                                           placeholder="$0.00">
+                                </div>
+                                <div>
+                                    <input type="number" value="${item.customerPrice || item.price || 0}" step="0.01" min="0"
+                                           onchange="updateItemCustomerPrice(${sectionIndex}, ${itemIndex}, this.value)"
+                                           style="width: 70px; padding: 4px 6px; border: 1px solid var(--section-bg); border-radius: 4px; text-align: right; font-size: 13px;"
+                                           placeholder="$0.00">
+                                </div>
+                                <div>
+                                    <input type="number" value="${item.shipping || 0}" step="0.01" min="0"
+                                           onchange="updateItemShipping(${sectionIndex}, ${itemIndex}, this.value)"
+                                           style="width: 50px; padding: 4px 6px; border: 1px solid var(--section-bg); border-radius: 4px; text-align: right; font-size: 13px;"
+                                           placeholder="$0.00">
+                                </div>
+                                <div>
+                                    <input type="number" value="${item.tax || 0}" step="0.01" min="0"
+                                           onchange="updateItemTax(${sectionIndex}, ${itemIndex}, this.value)"
+                                           style="width: 50px; padding: 4px 6px; border: 1px solid var(--section-bg); border-radius: 4px; text-align: right; font-size: 13px;"
+                                           placeholder="$0.00">
+                                </div>
+                                <div>
+                                    <span style="font-weight: 600; color: var(--text-primary);">
+                                        $${(((item.customerPrice || item.price || 0) * item.qty) + (item.shipping || 0) + (item.tax || 0)).toFixed(2)}
+                                    </span>
                                 </div>
                                 <div>
                                     ${item.link ? 
-                                        `<div style="display: flex; align-items: center; gap: 8px;">
-                                            <a href="${item.link}" target="_blank" style="color: var(--secondary-brand); text-decoration: none; font-weight: 500;">Link</a>
-                                            <button onclick="editItemLink(${sectionIndex}, ${itemIndex})" style="background: none; border: 1px solid var(--section-bg); border-radius: 3px; padding: 2px 6px; font-size: 11px; cursor: pointer;">✏️</button>
+                                        `<div style="display: flex; align-items: center; gap: 4px;">
+                                            <a href="${item.link}" target="_blank" style="color: var(--secondary-brand); text-decoration: none; font-weight: 500; font-size: 12px;">Link</a>
+                                            <button onclick="editItemLink(${sectionIndex}, ${itemIndex})" style="background: none; border: 1px solid var(--section-bg); border-radius: 3px; padding: 1px 4px; font-size: 10px; cursor: pointer;">✏️</button>
                                         </div>` :
-                                        `<button onclick="editItemLink(${sectionIndex}, ${itemIndex})" style="background: var(--section-bg); border: 1px solid var(--section-bg); border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; color: var(--text-secondary);">+ Add Link</button>`
+                                        `<button onclick="editItemLink(${sectionIndex}, ${itemIndex})" style="background: var(--section-bg); border: 1px solid var(--section-bg); border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; color: var(--text-secondary);">+ Link</button>`
                                     }
                                 </div>
                                 <div>
                                     <button onclick="toggleReadyToOrder(${sectionIndex}, ${itemIndex}, ${!item.readyToOrder})" 
                                             style="
                                                 background: ${item.readyToOrder ? 'linear-gradient(135deg, var(--success), var(--highlight))' : 'linear-gradient(135deg, #f8f9fa, #e9ecef)'};
-                                                border: 2px solid ${item.readyToOrder ? 'var(--success)' : 'var(--soft-rose)'};
+                                                border: 2px solid ${item.readyToOrder ? 'var(--success)' : 'var(--section-bg)'};
                                                 color: ${item.readyToOrder ? 'white' : 'var(--text-secondary)'};
-                                                padding: 8px 16px;
-                                                border-radius: 20px;
-                                                font-size: 12px;
+                                                padding: 4px 8px;
+                                                border-radius: 12px;
+                                                font-size: 11px;
                                                 font-weight: 600;
                                                 cursor: pointer;
                                                 transition: all 0.3s ease;
                                                 text-transform: uppercase;
-                                                letter-spacing: 0.5px;
-                                                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                                                letter-spacing: 0.3px;
+                                                box-shadow: 0 1px 4px rgba(0,0,0,0.1);
                                             "
-                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.2)'"
-                                            onmouseout="this.style.transform='translateY(0px)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
-                                        ${item.readyToOrder ? '✨ Ready to Order!' : 'Add to Cart'}
+                                            onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)'"
+                                            onmouseout="this.style.transform='translateY(0px)'; this.style.boxShadow='0 1px 4px rgba(0,0,0,0.1)'">
+                                        ${item.readyToOrder ? 'Ready to Order' : 'Ready to Order'}
                                     </button>
                                 </div>
                             </div>
@@ -1522,15 +1590,48 @@
             }
         }
         
-        // New function to update item price inline  
+        // Update functions for item pricing fields
         function updateItemPriceInline(sectionIndex, itemIndex, newPrice) {
             const price = parseFloat(newPrice);
             if (price >= 0) {
                 currentProject.sections[sectionIndex].items[itemIndex].price = price;
+                // Also update customer price if not set
+                if (!currentProject.sections[sectionIndex].items[itemIndex].customerPrice) {
+                    currentProject.sections[sectionIndex].items[itemIndex].customerPrice = price;
+                }
                 saveCurrentProject();
                 updateProjectSections();
                 updateReadyToOrderItems();
             }
+        }
+        
+        function updateItemWholesalePrice(sectionIndex, itemIndex, newPrice) {
+            const price = parseFloat(newPrice) || 0;
+            currentProject.sections[sectionIndex].items[itemIndex].wholesalePrice = price;
+            saveCurrentProject();
+            updateProjectSections();
+        }
+        
+        function updateItemCustomerPrice(sectionIndex, itemIndex, newPrice) {
+            const price = parseFloat(newPrice) || 0;
+            currentProject.sections[sectionIndex].items[itemIndex].customerPrice = price;
+            saveCurrentProject();
+            updateProjectSections();
+            updateReadyToOrderItems();
+        }
+        
+        function updateItemShipping(sectionIndex, itemIndex, newShipping) {
+            const shipping = parseFloat(newShipping) || 0;
+            currentProject.sections[sectionIndex].items[itemIndex].shipping = shipping;
+            saveCurrentProject();
+            updateProjectSections();
+        }
+        
+        function updateItemTax(sectionIndex, itemIndex, newTax) {
+            const tax = parseFloat(newTax) || 0;
+            currentProject.sections[sectionIndex].items[itemIndex].tax = tax;
+            saveCurrentProject();
+            updateProjectSections();
         }
         
         // Function to edit item link with prompt
@@ -1557,6 +1658,7 @@
             const container = document.getElementById('readyToOrderItems');
             const readyItems = [];
             
+            // Collect all ready to order items
             if (currentProject.sections) {
                 currentProject.sections.forEach((section, sectionIndex) => {
                     section.items.forEach((item, itemIndex) => {
@@ -1566,6 +1668,9 @@
                     });
                 });
             }
+            
+            // Update progress bar and counters
+            updateOrderProgress(readyItems);
             
             if (readyItems.length === 0) {
                 container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No items ready to order. Mark items as "Ready to Order" in the Items tab.</p>';
@@ -1627,7 +1732,43 @@
         function updateOrderStatus(sectionIndex, itemIndex, status) {
             currentProject.sections[sectionIndex].items[itemIndex].orderStatus = status;
             saveCurrentProject();
+            updateReadyToOrderItems(); // Refresh to update progress
             showCustomAlert(`Order status updated to "${status}"!`);
+        }
+        
+        function updateOrderProgress(readyItems) {
+            let pendingCount = 0;
+            let orderedCount = 0; 
+            let shippedCount = 0;
+            let deliveredCount = 0;
+            
+            readyItems.forEach(item => {
+                const status = item.orderStatus || 'pending';
+                switch(status) {
+                    case 'pending': pendingCount++; break;
+                    case 'ordered': orderedCount++; break; 
+                    case 'shipped': shippedCount++; break;
+                    case 'delivered': deliveredCount++; break;
+                }
+            });
+            
+            const total = readyItems.length;
+            const deliveredPercentage = total > 0 ? (deliveredCount / total) * 100 : 0;
+            
+            // Update progress bar
+            document.getElementById('deliveryProgress').style.width = `${deliveredPercentage}%`;
+            
+            // Update counters
+            document.getElementById('pendingCount').textContent = pendingCount;
+            document.getElementById('orderedCount').textContent = orderedCount;
+            document.getElementById('shippedCount').textContent = shippedCount;
+            document.getElementById('deliveredCount').textContent = deliveredCount;
+            
+            // Update summary text
+            const summaryText = total > 0 
+                ? `${deliveredCount} of ${total} items delivered (${deliveredPercentage.toFixed(0)}%)`
+                : 'No items to track';
+            document.getElementById('orderSummaryText').textContent = summaryText;
         }
 
         function removeFromReadyToOrder(sectionIndex, itemIndex) {
@@ -1809,7 +1950,7 @@
                         </div>
                         <div>
                             <strong>PAY TO:</strong><br>
-                            Rachel Zweig
+                            Kelly Ram Designs
                         </div>
                     </div>
                     <div style="text-align: right;">
@@ -1979,63 +2120,6 @@
                     showCustomAlert(`Added ${hoursToAdd} hours successfully! ✨\nTotal paid hours: ${currentProject.hoursPaid}`);
                 }
             );
-        }
-
-        // Quick hours submission function
-        function submitQuickHours() {
-            if (!currentProject) return;
-            
-            const hoursWorked = parseFloat(document.getElementById('quickHoursToLog').value);
-            const description = document.getElementById('quickHoursDescription').value.trim();
-            const paidHours = parseFloat(document.getElementById('quickPaidHours').value);
-            
-            if (isNaN(hoursWorked) || hoursWorked <= 0) {
-                showCustomAlert('Please enter valid hours worked.');
-                return;
-            }
-            
-            // Log hours worked
-            if (!currentProject.hoursLog) currentProject.hoursLog = [];
-            currentProject.hoursLog.push({
-                id: Date.now(),
-                date: new Date().toISOString().split('T')[0],
-                hours: hoursWorked,
-                description: description || 'Hours logged'
-            });
-            
-            currentProject.hoursWorked = (currentProject.hoursWorked || 0) + hoursWorked;
-            
-            // Add paid hours if specified
-            if (!isNaN(paidHours) && paidHours > 0) {
-                currentProject.hoursPaid = (currentProject.hoursPaid || 0) + paidHours;
-                
-                if (!currentProject.events) currentProject.events = [];
-                currentProject.events.push({
-                    id: Date.now() + 1,
-                    type: 'meeting',
-                    title: 'Hours Logged & Paid',
-                    date: new Date().toISOString().split('T')[0],
-                    time: '',
-                    notes: `Logged ${hoursWorked} hours (${description}). Added ${paidHours} paid hours.`,
-                    completed: true
-                });
-            }
-            
-            // Clear form
-            document.getElementById('quickHoursToLog').value = '';
-            document.getElementById('quickHoursDescription').value = '';
-            document.getElementById('quickPaidHours').value = '';
-            
-            saveCurrentProject();
-            updateProjectHours();
-            updateProjectUpcomingEvents();
-            displayProjects();
-            updateDashboard();
-            
-            const message = paidHours > 0 
-                ? `Logged ${hoursWorked} hours and added ${paidHours} paid hours! ✨`
-                : `Logged ${hoursWorked} hours successfully! ✨`;
-            showCustomAlert(message);
         }
 
         // Import CSV functionality
@@ -2442,10 +2526,16 @@
             if (existingOverlay) existingOverlay.remove();
             
             const overlay = document.createElement('div');
-            overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(45, 43, 40, 0.7); backdrop-filter: blur(5px); z-index: 1999;';
+            overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(45, 43, 40, 0.7); backdrop-filter: blur(5px); z-index: 1999; cursor: pointer;';
+            overlay.onclick = function() {
+                closeCustomPrompt();
+            };
             
             const promptBox = document.createElement('div');
-            promptBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); border: 2px solid var(--gentle-blue); border-radius: 16px; padding: 30px; box-shadow: 0 20px 60px rgba(45, 43, 40, 0.3); z-index: 2000; max-width: 500px; width: 90%;';
+            promptBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); border: 2px solid var(--gentle-blue); border-radius: 16px; padding: 30px; box-shadow: 0 20px 60px rgba(45, 43, 40, 0.3); z-index: 2000; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;';
+            promptBox.onclick = function(e) {
+                e.stopPropagation(); // Prevent closing when clicking inside the popup
+            };
             
             let fieldsHtml = '';
             fields.forEach(field => {
