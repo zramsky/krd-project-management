@@ -845,7 +845,7 @@
                             <h4 style="margin: 0 0 10px 0; font-size: 16px;">Quick Actions</h4>
                             <button class="btn btn-success" onclick="addEvent()" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">📅 Add Event</button>
                             <button class="btn btn-coral" onclick="showProjectSection('invoice')" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">📄 Generate Invoice</button>
-                            <button class="btn" onclick="logHours()" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">⏰ Log Hours</button>
+                            <button class="btn" onclick="logProjectHours()" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">⏰ Log Hours</button>
                             <button class="btn" onclick="addPaidHours()" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px; background: linear-gradient(135deg, var(--primary-brand), var(--client-bg)); color: white;">💰 Add Paid Hours</button>
                         </div>
                     </div>
@@ -1261,11 +1261,11 @@
             showCustomPrompt(
                 'Delete Project',
                 [
-                    { type: 'text', name: 'confirmation', label: `Type "${project.name}" to confirm deletion`, required: true, placeholder: 'Project name' }
+                    { type: 'text', name: 'confirmation', label: `Type "delete" to confirm deletion of "${project.name}"`, required: true, placeholder: 'Type delete' }
                 ],
                 (data) => {
-                    if (data.confirmation !== project.name) {
-                        showCustomAlert('Project name does not match. Deletion cancelled.');
+                    if (data.confirmation.toLowerCase() !== 'delete') {
+                        showCustomAlert('Please type "delete" to confirm. Deletion cancelled.');
                         return;
                     }
                     
@@ -1348,7 +1348,14 @@
                     currentProject.budget = data.budget ? parseFloat(data.budget) : null;
                     
                     saveCurrentProject();
-                    displayProjectDetails(currentProject);
+                    
+                    // Refresh the project detail view with updated information
+                    document.getElementById('detailClientName').textContent = currentProject.client;
+                    document.getElementById('detailClientEmail').textContent = currentProject.clientEmail || 'Not provided';
+                    document.getElementById('detailClientPhone').textContent = currentProject.clientPhone || 'Not provided';
+                    document.getElementById('detailStatus').textContent = currentProject.status;
+                    document.getElementById('detailBudget').textContent = currentProject.budget ? `$${currentProject.budget.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'No budget set';
+                    
                     displayProjects(); // Refresh the projects list
                     showCustomAlert('Project information updated successfully! ✨');
                 }
@@ -1539,16 +1546,24 @@
                 'Add Item',
                 [
                     { type: 'text', name: 'itemName', label: 'Item Name', required: true },
-                    { type: 'number', name: 'quantity', label: 'Quantity', required: true, placeholder: '1' },
-                    { type: 'number', name: 'price', label: 'Price', step: '0.01', required: true },
+                    { type: 'number', name: 'quantity', label: 'Quantity', required: true, defaultValue: '1' },
+                    { type: 'number', name: 'wholesalePrice', label: 'Wholesale Price ($)', step: '0.01', placeholder: '0.00' },
+                    { type: 'number', name: 'customerPrice', label: 'Customer Unit Price ($)', step: '0.01', required: true },
+                    { type: 'number', name: 'shipping', label: 'Shipping ($)', step: '0.01', placeholder: '0.00' },
+                    { type: 'number', name: 'tax', label: 'Tax ($)', step: '0.01', placeholder: '0.00' },
                     { type: 'url', name: 'link', label: 'Product Link', placeholder: 'https://...' }
                 ],
                 (data) => {
+                    const customerPrice = parseFloat(data.customerPrice) || 0;
                     currentProject.sections[sectionIndex].items.push({
                         id: Date.now(),
                         name: data.itemName,
-                        qty: parseInt(data.quantity),
-                        price: parseFloat(data.price),
+                        qty: parseInt(data.quantity) || 1,
+                        price: customerPrice, // Keep for backward compatibility
+                        customerPrice: customerPrice,
+                        wholesalePrice: parseFloat(data.wholesalePrice) || 0,
+                        shipping: parseFloat(data.shipping) || 0,
+                        tax: parseFloat(data.tax) || 0,
                         link: data.link || '',
                         readyToOrder: false,
                         orderStatus: 'pending'
@@ -1785,68 +1800,54 @@
             const hoursWorked = currentProject.hoursWorked || 0;
             const hoursRemaining = (currentProject.hoursPaid || 0) - hoursWorked;
             
-            document.getElementById('hoursWorkedDisplay').textContent = hoursWorked.toFixed(1);
-            document.getElementById('hoursRemainingDisplay').textContent = hoursRemaining.toFixed(1);
+            // Update only the elements that exist in the current UI (detailHoursWorked and detailHoursRemaining)
+            const hoursWorkedDisplay = document.getElementById('detailHoursWorked');
+            const hoursRemainingDisplay = document.getElementById('detailHoursRemaining');
             
-            // Update hours log
-            const hoursLogContainer = document.getElementById('hoursLog');
-            if (!currentProject.hoursLog || currentProject.hoursLog.length === 0) {
-                hoursLogContainer.innerHTML = '<p style="color: var(--text-secondary);">No hours logged yet.</p>';
-                return;
+            if (hoursWorkedDisplay) {
+                hoursWorkedDisplay.textContent = `${hoursWorked.toFixed(1)}h`;
             }
-            
-            hoursLogContainer.innerHTML = '';
-            currentProject.hoursLog.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            currentProject.hoursLog.forEach(entry => {
-                const entryDiv = document.createElement('div');
-                entryDiv.style.cssText = 'padding: 15px; border-bottom: 1px solid var(--section-bg); display: flex; justify-content: space-between; align-items: flex-start;';
-                entryDiv.innerHTML = `
-                    <div>
-                        <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 5px;">
-                            ${entry.hours} hours - ${new Date(entry.date).toLocaleDateString()}
-                        </div>
-                        <div style="color: var(--text-secondary); font-size: 14px;">${entry.description}</div>
-                    </div>
-                    <button class="btn btn-small" onclick="deleteHoursEntry(${entry.id})" style="background: #e74c3c; padding: 5px 8px;">Delete</button>
-                `;
-                hoursLogContainer.appendChild(entryDiv);
-            });
+            if (hoursRemainingDisplay) {
+                hoursRemainingDisplay.textContent = `${hoursRemaining.toFixed(1)}h`;
+            }
         }
 
         function logProjectHours() {
-            const hours = parseFloat(document.getElementById('hoursToLog').value);
-            const date = document.getElementById('hoursDate').value;
-            const description = document.getElementById('hoursDescription').value;
+            if (!currentProject) return;
             
-            if (!hours || !date || !description) {
-                showCustomAlert('Please fill in all fields.');
-                return;
-            }
-            
-            if (!currentProject.hoursLog) currentProject.hoursLog = [];
-            
-            currentProject.hoursLog.push({
-                id: Date.now(),
-                date: date,
-                hours: hours,
-                description: description
-            });
-            
-            currentProject.hoursWorked = (currentProject.hoursWorked || 0) + hours;
-            
-            saveCurrentProject();
-            
-            // Reset form
-            document.getElementById('hoursToLog').value = '';
-            document.getElementById('hoursDate').value = '';
-            document.getElementById('hoursDescription').value = '';
-            
-            updateProjectHours();
-            updateDashboard();
-            displayProjects();
-            
-            showCustomAlert('Hours logged successfully! ✨');
+            showCustomPrompt(
+                'Log Hours',
+                [
+                    { type: 'number', name: 'hours', label: 'Hours Worked', step: '0.25', required: true, placeholder: 'e.g. 2.5' },
+                    { type: 'date', name: 'date', label: 'Date', required: true, defaultValue: new Date().toISOString().split('T')[0] },
+                    { type: 'textarea', name: 'description', label: 'Description', required: true, placeholder: 'What did you work on?' }
+                ],
+                (data) => {
+                    const hours = parseFloat(data.hours);
+                    if (isNaN(hours) || hours <= 0) {
+                        showCustomAlert('Please enter valid hours.');
+                        return;
+                    }
+                    
+                    if (!currentProject.hoursLog) currentProject.hoursLog = [];
+                    
+                    currentProject.hoursLog.push({
+                        id: Date.now(),
+                        date: data.date,
+                        hours: hours,
+                        description: data.description
+                    });
+                    
+                    currentProject.hoursWorked = (currentProject.hoursWorked || 0) + hours;
+                    
+                    saveCurrentProject();
+                    updateProjectHours();
+                    updateDashboard();
+                    displayProjects();
+                    
+                    showCustomAlert(`Logged ${hours} hours successfully! ✨`);
+                }
+            );
         }
 
         function updateProjectUpcomingEvents() {
@@ -2626,7 +2627,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('startDate').valueAsDate = new Date();
-            document.getElementById('hoursDate').valueAsDate = new Date();
+            // Removed hours form initialization since Hours section was removed
             
             displayProjects();
             updateDashboard();
