@@ -2038,7 +2038,7 @@
                     <button class="btn btn-success" onclick="openNewProjectModal()">Create New Project</button>
                 </div>
                 <div class="mobile-only mobile-main-buttons">
-                    <button class="btn mobile-btn notes-btn" onclick="openNotesModal()" ontouchstart="">
+                    <button class="btn mobile-btn notes-btn" onclick="alert('Calling function...'); try { openNotesModal(); } catch(e) { alert('ERROR: ' + e.message); }" ontouchstart="">
                         <span class="btn-icon">📝</span>
                         <span class="btn-title">Add Notes</span>
                     </button>
@@ -9592,6 +9592,24 @@
 
         // Create a brand new simple notes function
         window.openNotesModal = function() {
+            alert('Step 1: Function called successfully!');
+            
+            // Test basic DOM manipulation first
+            try {
+                const testDiv = document.createElement('div');
+                testDiv.innerHTML = 'TEST';
+                alert('Step 2: DOM createElement works!');
+                
+                document.body.appendChild(testDiv);
+                alert('Step 3: DOM appendChild works!');
+                
+                testDiv.remove();
+                alert('Step 4: DOM remove works!');
+            } catch (e) {
+                alert('DOM ERROR: ' + e.message);
+                return;
+            }
+            
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
             
