@@ -2034,15 +2034,15 @@
                     <button class="btn btn-success" onclick="openNewProjectModal()">Create New Project</button>
                 </div>
                 <div class="mobile-only mobile-main-buttons">
-                    <button class="btn mobile-btn notes-btn" onclick="showAddNotesModal()">
+                    <button class="btn mobile-btn notes-btn" onclick="showAddNotesModal()" ontouchstart="">
                         <span class="btn-icon">📝</span>
                         <span class="btn-title">Add Notes</span>
                     </button>
-                    <button class="btn mobile-btn event-btn" onclick="showMobileAddEventModal()">
+                    <button class="btn mobile-btn event-btn" onclick="showMobileAddEventModal()" ontouchstart="">
                         <span class="btn-icon">📅</span>
                         <span class="btn-title">Add Event</span>
                     </button>
-                    <button class="btn mobile-btn projects-btn" onclick="showMobileProjectsView()">
+                    <button class="btn mobile-btn projects-btn" onclick="showMobileProjectsView()" ontouchstart="">
                         <span class="btn-icon">📁</span>
                         <span class="btn-title">Open Projects</span>
                     </button>
@@ -2547,6 +2547,15 @@
                 if (window.innerWidth <= 768) {
                     showTab('projects');
                 }
+                
+                // Make sure functions are globally available
+                window.showAddNotesModal = showAddNotesModal;
+                window.showMobileAddEventModal = showMobileAddEventModal;
+                window.showMobileProjectsView = showMobileProjectsView;
+                
+                // Debug: Test if functions are callable
+                console.log('showAddNotesModal available:', typeof window.showAddNotesModal);
+                console.log('Projects loaded:', Array.isArray(window.projects) ? window.projects.length : 'No projects');
                 
                 console.log('App initialized successfully');
             } catch (error) {
@@ -9145,44 +9154,70 @@
         let currentNoteId = null;
         
         function showAddNotesModal() {
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal">
-                    <div class="modal-header">
-                        <h3>Quick Note</h3>
-                        <button class="close-modal" onclick="closeNotesModal()">×</button>
+            try {
+                console.log('showAddNotesModal called');
+                
+                // Check if projects are loaded
+                if (!window.projects || !Array.isArray(window.projects)) {
+                    console.error('Projects not loaded yet');
+                    showCustomAlert('Please wait for the app to finish loading and try again.');
+                    return;
+                }
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                
+                // Get active projects
+                const activeProjects = projects.filter(p => p.status === 'active' || p.status !== 'completed');
+                console.log('Active projects found:', activeProjects.length);
+                
+                if (activeProjects.length === 0) {
+                    showCustomAlert('No active projects found. Please create a project first.');
+                    return;
+                }
+                
+                modal.innerHTML = `
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3>Quick Note</h3>
+                            <button class="close-modal" onclick="closeNotesModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Project</label>
+                                <select id="notesProjectSelect" onchange="handleProjectSelection()" required>
+                                    <option value="">Select project...</option>
+                                    ${activeProjects.map(project => 
+                                        `<option value="${project.id}">${project.name} - ${project.client}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Notes <span id="autoSaveStatus" style="font-size: 12px; color: var(--text-secondary); margin-left: 10px;"></span></label>
+                                <textarea id="notesContent" 
+                                          rows="8" 
+                                          placeholder="Start typing your notes..." 
+                                          oninput="autoSaveNote()"
+                                          disabled></textarea>
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 10px;">
+                                📅 Today: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Project</label>
-                            <select id="notesProjectSelect" onchange="handleProjectSelection()" required>
-                                <option value="">Select project...</option>
-                                ${projects.filter(p => p.status === 'active').map(project => 
-                                    `<option value="${project.id}">${project.name} - ${project.client}</option>`
-                                ).join('')}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Notes <span id="autoSaveStatus" style="font-size: 12px; color: var(--text-secondary); margin-left: 10px;"></span></label>
-                            <textarea id="notesContent" 
-                                      rows="8" 
-                                      placeholder="Start typing your notes..." 
-                                      oninput="autoSaveNote()"
-                                      disabled></textarea>
-                        </div>
-                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 10px;">
-                            📅 Today: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            // Focus on project select
-            setTimeout(() => {
-                document.getElementById('notesProjectSelect').focus();
-            }, 100);
+                `;
+                document.body.appendChild(modal);
+                
+                // Focus on project select
+                setTimeout(() => {
+                    document.getElementById('notesProjectSelect')?.focus();
+                }, 100);
+                
+                console.log('Notes modal created successfully');
+            } catch (error) {
+                console.error('Error in showAddNotesModal:', error);
+                alert('Error opening notes. Please refresh the page and try again.');
+            }
         }
         
         function handleProjectSelection() {
