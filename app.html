@@ -858,17 +858,626 @@
             .btn { display: none !important; }
         }
         
+        /* Mobile Optimizations */
         @media (max-width: 768px) {
+            /* Remove default body padding */
+            body {
+                padding-top: 0;
+                margin: 0;
+            }
+            
+            /* Ultra-narrow header container */
+            .header-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: var(--main-bg);
+                z-index: 1000;
+                border-bottom: 1px solid var(--section-bg);
+                box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                padding: 6px 15px;
+                height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* Hide theme toggle on mobile */
+            .theme-toggle {
+                display: none !important;
+            }
+            
+            /* Ultra-compact mobile header */
+            .header {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                height: 100%;
+            }
+            
+            /* Much smaller logo on mobile */
+            .logo svg {
+                width: 28px !important;
+                height: 28px !important;
+            }
+            
+            /* Header text adjustments */
+            .header-text {
+                text-align: center;
+                display: flex;
+                align-items: center;
+            }
+            
+            /* Compact header title */
+            h1 {
+                font-size: 16px !important;
+                text-align: center;
+                margin: 0 !important;
+                font-weight: 600;
+                line-height: 1;
+                white-space: nowrap;
+            }
+            
+            /* Navigation Tabs */
+            .tabs {
+                flex-direction: row;
+                gap: 5px;
+                padding: 5px;
+                background: var(--section-bg);
+                border-radius: 8px;
+                margin: 8px 0 0 0;
+                justify-content: center;
+            }
+            
+            .tab {
+                flex: 1;
+                text-align: center;
+                padding: 8px 12px;
+                margin: 0;
+                font-size: 14px;
+                border-radius: 6px;
+            }
+            
+            /* Container and Layout */
+            .container {
+                padding: 55px 15px 20px 15px; /* Adjusted for ultra-narrow header */
+                max-width: 100%;
+            }
+            
+            /* Grid Layouts */
             .project-grid, .two-column, .stats-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
+            
+            /* Dashboard Cards */
+            .card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .card h3 {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+            
+            /* Stats Grid Mobile */
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .stat-item {
+                padding: 12px;
+                text-align: center;
+            }
+            
+            .stat-value {
+                font-size: 20px !important;
+            }
+            
+            /* Project Cards */
+            .project-card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .project-card h4 {
+                font-size: 16px;
+            }
+            
+            /* Item Grid */
             .item-grid {
                 grid-template-columns: 1fr;
                 gap: 10px;
             }
+            
+            /* Project Tabs */
             .project-tabs {
                 flex-wrap: wrap;
+                gap: 5px;
+                justify-content: center;
             }
+            
+            .project-tab {
+                min-width: auto;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            /* Buttons */
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            .btn-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            /* Calendar Mobile */
+            .calendar-grid {
+                font-size: 12px;
+            }
+            
+            .calendar-day {
+                min-height: 40px;
+                padding: 4px 2px;
+                font-size: 12px;
+            }
+            
+            .calendar-day-number {
+                font-size: 12px;
+            }
+            
+            /* Forms */
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .form-group label {
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+            
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 16px; /* Prevent zoom on iOS */
+                padding: 12px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            /* Modals */
+            .modal {
+                margin: 10px;
+                max-height: 90vh;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .modal-header {
+                padding: 15px;
+                position: sticky;
+                top: 0;
+                background: var(--card-bg);
+                z-index: 10;
+            }
+            
+            .modal-header h3 {
+                font-size: 18px;
+            }
+            
+            .modal-body {
+                padding: 15px;
+            }
+            
+            .modal-footer {
+                padding: 15px;
+                position: sticky;
+                bottom: 0;
+                background: var(--card-bg);
+                border-top: 1px solid var(--section-bg);
+            }
+            
+            /* Tables */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            table {
+                min-width: 600px;
+            }
+            
+            /* Invoice Table Mobile */
+            .invoice-confirm-table {
+                font-size: 14px;
+            }
+            
+            .invoice-confirm-table th,
+            .invoice-confirm-table td {
+                padding: 8px 6px;
+                min-width: 80px;
+            }
+            
+            /* Quick Actions */
+            .quick-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            /* Touch Targets */
+            button, .btn, input[type="button"], input[type="submit"] {
+                min-height: 44px; /* iOS recommended touch target */
+                min-width: 44px;
+            }
+            
+            /* Spacing */
+            .section {
+                margin-bottom: 20px;
+                padding: 15px;
+            }
+            
+            /* Hide desktop-only elements */
+            .desktop-only {
+                display: none !important;
+            }
+            
+            /* Show mobile-only elements */
+            .mobile-only {
+                display: block !important;
+            }
+            
+            /* Hide ALL tabs on mobile */
+            .tabs {
+                display: none !important;
+            }
+            
+            /* Hide Dashboard content on mobile */
+            #dashboard {
+                display: none !important;
+            }
+            
+            /* Show Projects tab content by default on mobile */
+            #projects {
+                display: block !important;
+            }
+            
+            /* Projects header adjustments for mobile */
+            #projects > div:first-child {
+                margin-bottom: 0 !important;
+                padding-bottom: 0 !important;
+            }
+            
+            /* Hide entire header section with filters/buttons on mobile */
+            #projects > div:first-child > div:first-child {
+                display: none !important;
+            }
+            
+            #projects h2 {
+                display: none !important; /* Hide Projects title on mobile */
+            }
+            
+            /* Center the New Project button on mobile */
+            .mobile-only {
+                text-align: center;
+                margin: 0 auto 25px auto;
+                padding: 0 20px;
+            }
+            
+            /* Improve New Project button styling */
+            .mobile-only .btn {
+                padding: 15px 30px !important;
+                font-size: 18px !important;
+                font-weight: 600 !important;
+                border-radius: 25px !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+                margin: 0 !important;
+                width: auto !important;
+                max-width: 280px;
+            }
+            
+            /* Improve project card spacing and layout */
+            .project-card {
+                margin: 0 0 20px 0 !important;
+                border-radius: 16px !important;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+                padding: 20px !important;
+            }
+            
+            /* Improve project titles */
+            .project-card h4 {
+                font-size: 20px !important;
+                font-weight: 600 !important;
+                margin-bottom: 8px !important;
+                line-height: 1.3 !important;
+            }
+            
+            /* Improve client text */
+            .project-card p {
+                font-size: 16px !important;
+                color: var(--text-secondary) !important;
+                margin-bottom: 12px !important;
+            }
+            
+            /* Hide project grid on mobile - we'll show it in a separate view */
+            .project-grid {
+                display: none !important;
+            }
+            
+            /* Mobile main buttons - centered grid layout */
+            .mobile-main-buttons {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 40px 30px;
+                margin-top: 30px;
+            }
+            
+            /* Clean button styling */
+            .mobile-btn {
+                width: 100% !important;
+                padding: 22px 20px !important;
+                font-size: 18px !important;
+                font-weight: 600 !important;
+                border-radius: 16px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 12px !important;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+                margin: 0 !important;
+                transition: all 0.3s ease !important;
+                border: none !important;
+            }
+            
+            .mobile-btn:active {
+                transform: translateY(1px);
+                box-shadow: 0 1px 6px rgba(0,0,0,0.12) !important;
+            }
+            
+            .mobile-btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+            }
+            
+            .btn-icon {
+                font-size: 26px;
+            }
+            
+            .btn-title {
+                font-size: 18px;
+                font-weight: 600;
+            }
+            
+            .notes-btn {
+                background: var(--secondary-brand) !important;
+                color: white !important;
+                border: 2px solid var(--secondary-brand) !important;
+            }
+            
+            .event-btn {
+                background: var(--primary-brand) !important;
+                color: white !important;
+                border: 2px solid var(--primary-brand) !important;
+            }
+            
+            .projects-btn {
+                background: var(--highlight-color) !important;
+                color: white !important;
+                border: 2px solid var(--highlight-color) !important;
+            }
+            
+            /* Mobile Projects Modal */
+            .mobile-projects-modal .modal {
+                width: 95% !important;
+                max-width: 400px !important;
+                max-height: 85vh !important;
+                background: var(--card-bg) !important;
+                border: 1px solid var(--section-bg) !important;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+            }
+            
+            /* Mobile modal improvements */
+            .modal-overlay {
+                background: rgba(0, 0, 0, 0.6) !important;
+                backdrop-filter: blur(4px) !important;
+            }
+            
+            .modal {
+                background: var(--card-bg) !important;
+                border: 1px solid var(--section-bg) !important;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+            }
+            
+            .modal-header {
+                background: var(--section-bg) !important;
+                border-bottom: 1px solid var(--section-bg) !important;
+                padding: 15px 20px !important;
+            }
+            
+            .modal-header h3 {
+                color: var(--text-primary) !important;
+                margin: 0 !important;
+                font-weight: 600 !important;
+            }
+            
+            .modal-body {
+                padding: 20px !important;
+                background: var(--card-bg) !important;
+            }
+            
+            .modal-footer {
+                background: var(--section-bg) !important;
+                border-top: 1px solid var(--section-bg) !important;
+                padding: 15px 20px !important;
+                display: flex !important;
+                gap: 10px !important;
+                justify-content: flex-end !important;
+            }
+            
+            .mobile-projects-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                max-height: 60vh;
+                overflow-y: auto;
+                padding: 10px 0;
+            }
+            
+            .mobile-project-card {
+                background: var(--card-bg);
+                border-radius: 12px;
+                padding: 16px;
+                border: 1px solid var(--section-bg);
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            }
+            
+            .mobile-project-card:hover {
+                background: var(--hover-bg);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            }
+            
+            .mobile-project-card h4 {
+                margin: 0 0 8px 0 !important;
+                font-size: 16px !important;
+                font-weight: 600 !important;
+                color: var(--text-primary) !important;
+            }
+            
+            .mobile-project-card p {
+                margin: 0 0 8px 0 !important;
+                font-size: 14px !important;
+                color: var(--text-secondary) !important;
+            }
+            
+            .mobile-project-card .status-badge {
+                display: inline-block;
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+                border-radius: 12px !important;
+                font-weight: 600 !important;
+                margin-bottom: 8px;
+            }
+            
+            .project-meta {
+                display: flex;
+                justify-content: space-between;
+                font-size: 12px !important;
+                color: var(--text-tertiary) !important;
+            }
+            
+            /* Mobile form styling */
+            .form-group label {
+                color: var(--text-primary) !important;
+                font-weight: 600 !important;
+                margin-bottom: 8px !important;
+                display: block !important;
+            }
+            
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                background: var(--main-bg) !important;
+                border: 2px solid var(--section-bg) !important;
+                border-radius: 8px !important;
+                padding: 12px !important;
+                font-size: 16px !important;
+                color: var(--text-primary) !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                transition: border-color 0.2s ease !important;
+            }
+            
+            .form-group input:focus,
+            .form-group select:focus,
+            .form-group textarea:focus {
+                outline: none !important;
+                border-color: var(--primary-brand) !important;
+                box-shadow: 0 0 0 3px rgba(216, 167, 167, 0.1) !important;
+            }
+            
+            /* Button improvements for modals */
+            .btn-primary {
+                background: var(--primary-brand) !important;
+                border: 2px solid var(--primary-brand) !important;
+                color: white !important;
+                padding: 10px 20px !important;
+                border-radius: 8px !important;
+                font-weight: 600 !important;
+            }
+            
+            .btn-secondary {
+                background: transparent !important;
+                border: 2px solid var(--text-tertiary) !important;
+                color: var(--text-secondary) !important;
+                padding: 10px 20px !important;
+                border-radius: 8px !important;
+                font-weight: 600 !important;
+            }
+            
+            /* Close button styling */
+            .close-modal {
+                background: none !important;
+                border: none !important;
+                color: var(--text-secondary) !important;
+                font-size: 24px !important;
+                cursor: pointer !important;
+                padding: 0 !important;
+                width: 30px !important;
+                height: 30px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                border-radius: 50% !important;
+                transition: all 0.2s ease !important;
+            }
+            
+            .close-modal:hover {
+                background: var(--hover-bg) !important;
+                color: var(--text-primary) !important;
+            }
+        }
+        
+        /* Tablet Optimizations */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .project-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Header Container - Desktop */
+        .header-container {
+            position: relative;
+            background: var(--main-bg);
+        }
+        
+        /* Desktop and mobile utility classes */
+        .mobile-only {
+            display: none;
+        }
+        
+        .desktop-only {
+            display: block;
         }
 
         /* Invoice Confirmation Table Styles */
@@ -1288,7 +1897,8 @@
     </style>
 </head>
     <body class="brand-boosted brand-logo-xl">
-    <div class="container">
+    <!-- Header Container for Mobile -->
+    <div class="header-container">
         <div class="header">
               <div class="theme-toggle" title="Toggle theme">
                   <button id="themeSwitchBtn" aria-label="Toggle theme">☀️</button>
@@ -1315,10 +1925,10 @@
             </div>
             <div class="header-text">
                 <h1>Kelly Ram Designs</h1>
-                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                <div class="desktop-only" style="font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
                     v8.0 • GitHub Tracked • Last Updated: August 2025
                 </div>
-                <p>Professional Project Management System</p>
+                <p class="desktop-only">Professional Project Management System</p>
             </div>
         </div>
         
@@ -1326,6 +1936,9 @@
             <button class="tab active" onclick="showTab('dashboard', event)">Dashboard</button>
             <button class="tab" onclick="showTab('projects', event)">Projects</button>
         </div>
+    </div>
+
+    <div class="container">
 
         <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content active">
@@ -1390,7 +2003,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <div>
                     <h2 style="margin: 0; color: var(--text-primary); font-weight: 300;">Projects</h2>
-                    <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
+                    <div class="desktop-only" style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
                         <input type="text" id="projectSearch" placeholder="Search projects..." style="padding: 8px 12px; border: 2px solid var(--section-bg); border-radius: 20px; width: 250px; font-size: 14px;" onkeyup="filterProjects()">
                         <select id="statusFilter" onchange="filterProjects()" style="padding: 8px 12px; border: 2px solid var(--section-bg); border-radius: 12px;">
                             <option value="active">Active Only</option>
@@ -1404,9 +2017,23 @@
                         </select>
                     </div>
                 </div>
-                <div>
+                <div class="desktop-only">
                     <button class="btn" onclick="duplicateProject()" style="margin-right: 10px;">Duplicate Last</button>
                     <button class="btn btn-success" onclick="openNewProjectModal()">Create New Project</button>
+                </div>
+                <div class="mobile-only mobile-main-buttons">
+                    <button class="btn mobile-btn notes-btn" onclick="showAddNotesModal()">
+                        <span class="btn-icon">📝</span>
+                        <span class="btn-title">Add Notes</span>
+                    </button>
+                    <button class="btn mobile-btn event-btn" onclick="showMobileAddEventModal()">
+                        <span class="btn-icon">📅</span>
+                        <span class="btn-title">Add Event</span>
+                    </button>
+                    <button class="btn mobile-btn projects-btn" onclick="showMobileProjectsView()">
+                        <span class="btn-icon">📁</span>
+                        <span class="btn-title">Open Projects</span>
+                    </button>
                 </div>
             </div>
             
@@ -1891,6 +2518,11 @@
                 // Initialize UI
                 updateDashboard();
                 updateEventsCalendar();
+                
+                // Check if mobile and switch to Projects tab
+                if (window.innerWidth <= 768) {
+                    showTab('projects');
+                }
                 
                 console.log('App initialized successfully');
             } catch (error) {
@@ -8299,6 +8931,202 @@
             };
             
             input.click();
+        }
+
+        // Mobile-specific functions
+        function showAddNotesModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3>Add Notes to Project</h3>
+                        <button class="close-modal" onclick="this.closest('.modal-overlay').remove()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Select Project</label>
+                            <select id="notesProjectSelect" required>
+                                <option value="">Choose a project...</option>
+                                ${projects.map(project => `<option value="${project.id}">${project.name} - ${project.client}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="notesDate" value="${new Date().toISOString().split('T')[0]}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <textarea id="notesContent" rows="6" placeholder="Enter your notes here..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                        <button class="btn btn-primary" onclick="saveProjectNotes()">Save Notes</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function saveProjectNotes() {
+            const projectId = document.getElementById('notesProjectSelect').value;
+            const date = document.getElementById('notesDate').value;
+            const content = document.getElementById('notesContent').value;
+
+            if (!projectId || !date || !content) {
+                showCustomAlert('Please fill in all fields.');
+                return;
+            }
+
+            const project = projects.find(p => p.id == projectId);
+            if (!project) {
+                showCustomAlert('Project not found.');
+                return;
+            }
+
+            if (!project.notes) project.notes = [];
+            
+            project.notes.push({
+                id: Date.now(),
+                date: date,
+                content: content,
+                createdAt: new Date().toISOString()
+            });
+
+            saveProjects();
+            document.querySelector('.modal-overlay').remove();
+            showCustomAlert('Notes added successfully! ✨');
+        }
+
+        function showMobileAddEventModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3>Add Event</h3>
+                        <button class="close-modal" onclick="this.closest('.modal-overlay').remove()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Select Project</label>
+                            <select id="eventProjectSelect" required>
+                                <option value="">Choose a project...</option>
+                                ${projects.map(project => `<option value="${project.id}">${project.name} - ${project.client}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Event Title</label>
+                            <input type="text" id="eventTitle" placeholder="Enter event title" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="eventDate" value="${new Date().toISOString().split('T')[0]}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="eventTime" value="09:00">
+                        </div>
+                        <div class="form-group">
+                            <label>Event Type</label>
+                            <select id="eventType">
+                                <option value="meeting">Meeting</option>
+                                <option value="consultation">Consultation</option>
+                                <option value="design">Design Session</option>
+                                <option value="delivery">Delivery</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes (Optional)</label>
+                            <textarea id="eventNotes" rows="3" placeholder="Additional notes..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                        <button class="btn btn-primary" onclick="saveMobileEvent()">Create Event</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function saveMobileEvent() {
+            const projectId = document.getElementById('eventProjectSelect').value;
+            const title = document.getElementById('eventTitle').value;
+            const date = document.getElementById('eventDate').value;
+            const time = document.getElementById('eventTime').value;
+            const type = document.getElementById('eventType').value;
+            const notes = document.getElementById('eventNotes').value;
+
+            if (!projectId || !title || !date) {
+                showCustomAlert('Please fill in all required fields.');
+                return;
+            }
+
+            const project = projects.find(p => p.id == projectId);
+            if (!project) {
+                showCustomAlert('Project not found.');
+                return;
+            }
+
+            if (!project.events) project.events = [];
+            
+            project.events.push({
+                id: Date.now(),
+                type: type,
+                title: title,
+                date: date,
+                time: time || '',
+                notes: notes || '',
+                completed: false
+            });
+
+            saveProjects();
+            updateEventsCalendar();
+            document.querySelector('.modal-overlay').remove();
+            showCustomAlert('Event created successfully! ✨');
+        }
+
+        function showMobileProjectsView() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay mobile-projects-modal';
+            modal.innerHTML = `
+                <div class="modal mobile-projects-view">
+                    <div class="modal-header">
+                        <h3>All Projects</h3>
+                        <button class="close-modal" onclick="this.closest('.modal-overlay').remove()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mobile-projects-grid">
+                            ${projects.map(project => `
+                                <div class="mobile-project-card" onclick="selectMobileProject('${project.id}')">
+                                    <h4>${project.name}</h4>
+                                    <p>Client: ${project.client}</p>
+                                    <div class="status-badge ${project.status || 'active'}">${(project.status || 'active').toUpperCase()}</div>
+                                    <div class="project-meta">
+                                        <span>Budget: $${project.budget || 0}</span>
+                                        <span>Hours: ${project.hoursLogged || 0}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function selectMobileProject(projectId) {
+            // Close the projects modal
+            document.querySelector('.modal-overlay').remove();
+            
+            // Show the selected project (this would open the project details)
+            const project = projects.find(p => p.id == projectId);
+            if (project) {
+                showProjectDetails(project);
+            }
         }
 
         // Initialize the app when DOM is loaded
