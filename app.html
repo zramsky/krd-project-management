@@ -2034,15 +2034,15 @@
                     <button class="btn btn-success" onclick="openNewProjectModal()">Create New Project</button>
                 </div>
                 <div class="mobile-only mobile-main-buttons">
-                    <button class="btn mobile-btn notes-btn" onclick="alert('Button clicked! Function: ' + typeof showAddNotesModal); try { showAddNotesModal(); } catch(e) { alert('Error: ' + e.message); }" ontouchstart="">
+                    <button class="btn mobile-btn notes-btn" onclick="showAddNotesModal()" ontouchstart="">
                         <span class="btn-icon">📝</span>
                         <span class="btn-title">Add Notes</span>
                     </button>
-                    <button class="btn mobile-btn event-btn" onclick="alert('Event button clicked - not implemented yet')" ontouchstart="">
+                    <button class="btn mobile-btn event-btn" onclick="alert('Add Event feature coming soon!')" ontouchstart="">
                         <span class="btn-icon">📅</span>
                         <span class="btn-title">Add Event</span>
                     </button>
-                    <button class="btn mobile-btn projects-btn" onclick="alert('Projects button clicked - not implemented yet')" ontouchstart="">
+                    <button class="btn mobile-btn projects-btn" onclick="alert('Open Projects feature coming soon!')" ontouchstart="">
                         <span class="btn-icon">📁</span>
                         <span class="btn-title">Open Projects</span>
                     </button>
@@ -9222,9 +9222,6 @@
                 console.log('showAddNotesModal called');
                 console.log('window.projects:', window.projects);
                 console.log('projects variable:', projects);
-                
-                // Simple test alert to confirm function is being called
-                alert('Add Notes function called! Check console for details.');
                 
                 // Ensure projects is available and is an array
                 if (!projects || !Array.isArray(projects)) {
