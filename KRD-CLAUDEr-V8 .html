@@ -6,6 +6,41 @@
     <title>Kelly Ram Designs - Project Management System v8 (GitHub Tracked)</title>
     <!-- html2pdf library for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyACBu_uzIh-gdJV1yNdczDNLaVjkCkwci4",
+            authDomain: "kellyramdesigns-498af.firebaseapp.com",
+            projectId: "kellyramdesigns-498af",
+            storageBucket: "kellyramdesigns-498af.firebasestorage.app",
+            messagingSenderId: "768167199138",
+            appId: "1:768167199138:web:b7a99cb9ef2dd2fba9f2fb"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Make Firebase functions available globally
+        window.firebaseApp = app;
+        window.firestore = db;
+        window.firestoreFunctions = {
+            collection,
+            doc,
+            setDoc,
+            getDoc,
+            getDocs,
+            updateDoc,
+            deleteDoc,
+            onSnapshot
+        };
+    </script>
     <style>
         /* Import Inter font */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -1748,6 +1783,127 @@
         let currentProject = null;
         let invoiceCounter = parseInt(localStorage.getItem('invoiceCounter') || '1204');
 
+        // Firebase Database Helper Functions
+        async function saveProjects() {
+            try {
+                if (window.firestore && window.firestoreFunctions) {
+                    const { doc, setDoc } = window.firestoreFunctions;
+                    await setDoc(doc(window.firestore, 'appData', 'projects'), {
+                        projects: projects,
+                        lastUpdated: new Date().toISOString()
+                    });
+                    console.log('Projects saved to Firebase');
+                } else {
+                    // Fallback to localStorage if Firebase not ready
+                    saveProjects();
+                }
+            } catch (error) {
+                console.error('Error saving projects:', error);
+                // Fallback to localStorage on error
+                saveProjects();
+            }
+        }
+
+        async function saveInvoiceCounter() {
+            try {
+                if (window.firestore && window.firestoreFunctions) {
+                    const { doc, setDoc } = window.firestoreFunctions;
+                    await setDoc(doc(window.firestore, 'appData', 'invoiceCounter'), {
+                        counter: invoiceCounter,
+                        lastUpdated: new Date().toISOString()
+                    });
+                    console.log('Invoice counter saved to Firebase');
+                } else {
+                    saveInvoiceCounter();
+                }
+            } catch (error) {
+                console.error('Error saving invoice counter:', error);
+                saveInvoiceCounter();
+            }
+        }
+
+        async function loadProjects() {
+            try {
+                if (window.firestore && window.firestoreFunctions) {
+                    const { doc, getDoc } = window.firestoreFunctions;
+                    const docSnap = await getDoc(doc(window.firestore, 'appData', 'projects'));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        projects = data.projects || [];
+                        console.log('Projects loaded from Firebase');
+                        return true;
+                    } else {
+                        console.log('No projects found in Firebase, using localStorage');
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                return false;
+            }
+        }
+
+        async function loadInvoiceCounter() {
+            try {
+                if (window.firestore && window.firestoreFunctions) {
+                    const { doc, getDoc } = window.firestoreFunctions;
+                    const docSnap = await getDoc(doc(window.firestore, 'appData', 'invoiceCounter'));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        invoiceCounter = data.counter || 1204;
+                        console.log('Invoice counter loaded from Firebase');
+                        return true;
+                    } else {
+                        console.log('No invoice counter found in Firebase, using localStorage');
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error loading invoice counter:', error);
+                return false;
+            }
+        }
+
+        // Initialize data loading
+        async function initializeApp() {
+            try {
+                // Wait for Firebase to be ready
+                let attempts = 0;
+                while (!window.firestore && attempts < 10) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+
+                const projectsLoaded = await loadProjects();
+                const counterLoaded = await loadInvoiceCounter();
+                
+                if (!projectsLoaded || !counterLoaded) {
+                    console.log('Using localStorage fallback');
+                }
+                
+                // Migrate old data if needed
+                migrateOldProjects();
+                
+                // Initialize UI
+                updateDashboard();
+                updateEventsCalendar();
+                
+                console.log('App initialized successfully');
+            } catch (error) {
+                console.error('Error initializing app:', error);
+            }
+        }
+
+        // Replace all localStorage.setItem calls with our save functions
+        function saveData() {
+            saveProjects();
+            saveInvoiceCounter();
+        }
+
         // Global helper functions for hours:minutes input format
         function parseHoursMinutes(input) {
             if (!input) return 0;
@@ -1837,7 +1993,7 @@
                 }
             });
             if (needsSaving) {
-                localStorage.setItem('projects', JSON.stringify(projects));
+                saveProjects();
             }
         }
 
@@ -1891,7 +2047,7 @@
                 invoiceNumber: "011204",
                 amountPaid: 0
             }];
-            localStorage.setItem('projects', JSON.stringify(projects));
+            saveProjects();
         }
 
         function showTab(tabName, event) {
@@ -2648,8 +2804,8 @@
                 projects.push(project);
             }
 
-            localStorage.setItem('projects', JSON.stringify(projects));
-            localStorage.setItem('invoiceCounter', invoiceCounter.toString());
+            saveProjects();
+            saveInvoiceCounter();
             
             closeProjectModal();
             displayProjects();
@@ -2694,7 +2850,7 @@
                     const index = projects.findIndex(p => p.id === projectId);
                     if (index !== -1) {
                         projects.splice(index, 1);
-                        localStorage.setItem('projects', JSON.stringify(projects));
+                        saveProjects();
                         
                         displayProjects();
                         updateDashboard();
@@ -6276,7 +6432,7 @@
             const projectIndex = projects.findIndex(p => p.id === currentProject.id);
             if (projectIndex !== -1) {
                 projects[projectIndex] = currentProject;
-                localStorage.setItem('projects', JSON.stringify(projects));
+                saveProjects();
             }
 
                 console.log('About to generate invoice...');
@@ -6467,7 +6623,7 @@
             const index = projects.findIndex(p => p.id === currentProject.id);
             if (index !== -1) {
                 projects[index] = currentProject;
-                localStorage.setItem('projects', JSON.stringify(projects));
+                saveProjects();
             }
         }
 
@@ -6648,7 +6804,7 @@
                         completed: false
                     });
                     
-                    localStorage.setItem('projects', JSON.stringify(projects));
+                    saveProjects();
                     updateUpcomingEvents();
                     showCustomAlert('Event added successfully! ✨');
                 }
@@ -7783,8 +7939,8 @@
             };
             
             projects.push(duplicatedProject);
-            localStorage.setItem('projects', JSON.stringify(projects));
-            localStorage.setItem('invoiceCounter', invoiceCounter.toString());
+            saveProjects();
+            saveInvoiceCounter();
             
             displayProjects();
             updateDashboard();
@@ -8143,6 +8299,16 @@
             };
             
             input.click();
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializeApp);
+        
+        // Also call immediately in case DOM is already loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
         }
     </script>
 </body>
