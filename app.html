@@ -9399,7 +9399,7 @@
                                 style="padding:12px 20px;background:#999;color:white;border:none;border-radius:8px;cursor:pointer;margin-right:10px;">
                             Cancel
                         </button>
-                        <button onclick="saveNoteFromModal()" 
+                        <button onclick="window.saveNoteFromModal ? window.saveNoteFromModal() : alert('Function not found!')" 
                                 style="padding:12px 20px;background:#007bff;color:white;border:none;border-radius:8px;cursor:pointer;">
                             Save Note
                         </button>
