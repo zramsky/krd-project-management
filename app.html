@@ -2430,13 +2430,18 @@
 
     <script>
         // Sample data with enhanced structure
-        let projects = JSON.parse(localStorage.getItem('projects') || '[]');
+        // Global variables
+        window.projects = JSON.parse(localStorage.getItem('projects') || '[]');
+        let projects = window.projects; // Keep reference for existing code
         let currentProject = null;
         let invoiceCounter = parseInt(localStorage.getItem('invoiceCounter') || '1204');
 
         // Firebase Database Helper Functions
         async function saveProjects() {
             try {
+                // Ensure global reference is up to date
+                window.projects = projects;
+                
                 if (window.firestore && window.firestoreFunctions) {
                     const { doc, setDoc } = window.firestoreFunctions;
                     await setDoc(doc(window.firestore, 'appData', 'projects'), {
@@ -2444,15 +2449,13 @@
                         lastUpdated: new Date().toISOString()
                     });
                     console.log('Projects saved to Firebase');
-                } else {
-                    // Fallback to localStorage if Firebase not ready
-                    saveProjects();
                 }
             } catch (error) {
                 console.error('Error saving projects:', error);
-                // Fallback to localStorage on error
-                saveProjects();
             }
+            
+            // Always save to localStorage as backup
+            localStorage.setItem('projects', JSON.stringify(projects));
         }
 
         async function saveInvoiceCounter() {
@@ -2481,6 +2484,7 @@
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         projects = data.projects || [];
+                        window.projects = projects; // Update global reference
                         console.log('Projects loaded from Firebase');
                         return true;
                     } else {
@@ -9156,23 +9160,32 @@
         function showAddNotesModal() {
             try {
                 console.log('showAddNotesModal called');
+                console.log('window.projects:', window.projects);
+                console.log('projects variable:', projects);
                 
-                // Check if projects are loaded
-                if (!window.projects || !Array.isArray(window.projects)) {
-                    console.error('Projects not loaded yet');
-                    showCustomAlert('Please wait for the app to finish loading and try again.');
+                // Ensure projects is available and is an array
+                if (!projects || !Array.isArray(projects)) {
+                    // Try to reload from localStorage
+                    projects = JSON.parse(localStorage.getItem('projects') || '[]');
+                    window.projects = projects;
+                    console.log('Reloaded projects from localStorage:', projects.length);
+                }
+                
+                if (!projects || !Array.isArray(projects) || projects.length === 0) {
+                    console.error('No projects available');
+                    showCustomAlert('No projects found. Please create a project first, then try adding notes.');
                     return;
                 }
                 
                 const modal = document.createElement('div');
                 modal.className = 'modal-overlay';
                 
-                // Get active projects
-                const activeProjects = projects.filter(p => p.status === 'active' || p.status !== 'completed');
+                // Get active projects (all projects that aren't completed)
+                const activeProjects = projects.filter(p => !p.status || p.status !== 'completed');
                 console.log('Active projects found:', activeProjects.length);
                 
                 if (activeProjects.length === 0) {
-                    showCustomAlert('No active projects found. Please create a project first.');
+                    showCustomAlert('All projects are completed. Please create a new project first.');
                     return;
                 }
                 
