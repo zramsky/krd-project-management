@@ -5791,12 +5791,7 @@
         
         // Function to add a note from desktop
         function addProjectNote() {
-            if (!currentProject) {
-                alert('No project selected!');
-                return;
-            }
-            
-            alert('Add Note button clicked! Project: ' + currentProject.name);
+            if (!currentProject) return;
             
             showCustomPrompt(
                 'Add Note',
@@ -5811,6 +5806,7 @@
                     }
                 ],
                 (data) => {
+                    console.log('Desktop note callback called with:', data);
                     if (!currentProject.notes) currentProject.notes = [];
                     
                     const newNote = {
@@ -5821,7 +5817,10 @@
                         updatedAt: new Date().toISOString()
                     };
                     
+                    console.log('Adding note:', newNote);
                     currentProject.notes.push(newNote);
+                    console.log('Current project notes:', currentProject.notes);
+                    
                     saveCurrentProject();
                     updateProjectNotes();
                     showCustomAlert('Note added successfully! 📝');
@@ -9704,10 +9703,8 @@
             }
             
             // Close modal
-            document.querySelector('div[style*="position:fixed"]').remove();
-            
-            // Show success message
-            alert('Note saved successfully! 📝\n\nYou can view it in the Project Notes section when you open the project details.');
+            const modal = document.querySelector('div[style*="position:fixed"]');
+            if (modal) modal.remove();
         };
         
         console.log('Kelly Ram Designs - Mobile functions loaded at script start');
