@@ -2034,7 +2034,7 @@
                     <button class="btn btn-success" onclick="openNewProjectModal()">Create New Project</button>
                 </div>
                 <div class="mobile-only mobile-main-buttons">
-                    <button class="btn mobile-btn notes-btn" onclick="showAddNotesModal()" ontouchstart="">
+                    <button class="btn mobile-btn notes-btn" onclick="document.body.style.backgroundColor='blue'; setTimeout(() => document.body.style.backgroundColor='', 500); showAddNotesModal();" ontouchstart="">
                         <span class="btn-icon">📝</span>
                         <span class="btn-title">Add Notes</span>
                     </button>
@@ -9219,6 +9219,10 @@
         
         function showAddNotesModal() {
             try {
+                // Simple test - if this doesn't show, function isn't being called
+                document.body.style.backgroundColor = 'red';
+                setTimeout(() => document.body.style.backgroundColor = '', 1000);
+                
                 console.log('showAddNotesModal called - v8.1 clean version');
                 console.log('window.projects:', window.projects);
                 console.log('projects variable:', projects);
