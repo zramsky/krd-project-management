@@ -9418,13 +9418,8 @@
         
         // Function to save note from mobile modal
         function saveNoteFromModal() {
-            alert('Save button clicked!'); // Debug alert
-            
             const projectId = document.getElementById('notesProjectSelect').value;
             const noteContent = document.getElementById('clientNotes').value;
-            
-            console.log('Project ID:', projectId);
-            console.log('Note Content:', noteContent);
             
             if (!projectId) {
                 alert('Please select a project first.');
