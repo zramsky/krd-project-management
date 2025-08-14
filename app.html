@@ -2557,6 +2557,9 @@
                 window.showMobileAddEventModal = showMobileAddEventModal;
                 window.showMobileProjectsView = showMobileProjectsView;
                 
+                // Set up mobile button event listeners as fallback
+                setupMobileButtonListeners();
+                
                 // Debug: Test if functions are callable
                 console.log('showAddNotesModal available:', typeof window.showAddNotesModal);
                 console.log('Projects loaded:', Array.isArray(window.projects) ? window.projects.length : 'No projects');
@@ -9152,6 +9155,63 @@
             
             input.click();
         }
+        
+        // Setup mobile button event listeners as fallback
+        function setupMobileButtonListeners() {
+            try {
+                console.log('Setting up mobile button listeners...');
+                
+                // Wait for DOM to be ready
+                setTimeout(() => {
+                    const notesBtn = document.querySelector('.notes-btn');
+                    const eventBtn = document.querySelector('.event-btn');
+                    const projectsBtn = document.querySelector('.projects-btn');
+                    
+                    if (notesBtn) {
+                        console.log('Adding listener to notes button');
+                        notesBtn.addEventListener('click', function(e) {
+                            console.log('Notes button clicked via event listener');
+                            e.preventDefault();
+                            e.stopPropagation();
+                            showAddNotesModal();
+                        });
+                        notesBtn.addEventListener('touchend', function(e) {
+                            console.log('Notes button touched via event listener');
+                            e.preventDefault();
+                            e.stopPropagation();
+                            showAddNotesModal();
+                        });
+                    } else {
+                        console.log('Notes button not found');
+                    }
+                    
+                    if (eventBtn) {
+                        console.log('Adding listener to event button');
+                        eventBtn.addEventListener('click', function(e) {
+                            console.log('Event button clicked via event listener');
+                            e.preventDefault();
+                            e.stopPropagation();
+                            showMobileAddEventModal();
+                        });
+                    }
+                    
+                    if (projectsBtn) {
+                        console.log('Adding listener to projects button');
+                        projectsBtn.addEventListener('click', function(e) {
+                            console.log('Projects button clicked via event listener');
+                            e.preventDefault();
+                            e.stopPropagation();
+                            showMobileProjectsView();
+                        });
+                    }
+                    
+                    console.log('Mobile button listeners setup complete');
+                }, 500); // Wait 500ms for DOM to be ready
+                
+            } catch (error) {
+                console.error('Error setting up mobile button listeners:', error);
+            }
+        }
 
         // Mobile-specific functions
         let notesAutoSaveTimer = null;
@@ -9162,6 +9222,9 @@
                 console.log('showAddNotesModal called');
                 console.log('window.projects:', window.projects);
                 console.log('projects variable:', projects);
+                
+                // Simple test alert to confirm function is being called
+                alert('Add Notes function called! Check console for details.');
                 
                 // Ensure projects is available and is an array
                 if (!projects || !Array.isArray(projects)) {
@@ -9484,6 +9547,15 @@
             }
         }
 
+        // Test function availability immediately
+        console.log('Functions available at script load:');
+        console.log('- showAddNotesModal:', typeof showAddNotesModal);
+        
+        // Make functions globally available immediately
+        window.showAddNotesModal = showAddNotesModal;
+        window.showMobileAddEventModal = showMobileAddEventModal || function() { alert('Add Event not implemented yet'); };
+        window.showMobileProjectsView = showMobileProjectsView || function() { alert('Open Projects not implemented yet'); };
+        
         // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', initializeApp);
         
