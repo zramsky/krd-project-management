@@ -9369,14 +9369,32 @@
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
             
+            // Get active projects for the selector
+            const activeProjects = window.projects ? window.projects.filter(p => !p.status || p.status !== 'completed') : [];
+            
             modal.innerHTML = `
                 <div style="background:white;padding:30px;border-radius:15px;max-width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-                    <h2 style="margin:0 0 15px 0;color:#333;">Quick Notes</h2>
-                    <p style="color:#666;margin-bottom:15px;">Add your notes for this client visit:</p>
-                    <textarea placeholder="Type your notes here..." 
-                              style="width:100%;height:120px;padding:15px;border:2px solid #ddd;border-radius:8px;font-size:16px;box-sizing:border-box;resize:none;"
-                              id="clientNotes"></textarea>
-                    <div style="margin-top:20px;text-align:right;">
+                    <h2 style="margin:0 0 20px 0;color:#333;">Quick Notes</h2>
+                    
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block;font-weight:600;color:#333;margin-bottom:8px;">Select Project:</label>
+                        <select id="notesProjectSelect" 
+                                style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:16px;box-sizing:border-box;background:white;">
+                            <option value="">Choose a project...</option>
+                            ${activeProjects.map(project => 
+                                `<option value="${project.id}">${project.name} - ${project.client}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block;font-weight:600;color:#333;margin-bottom:8px;">Notes:</label>
+                        <textarea placeholder="Type your notes here..." 
+                                  style="width:100%;height:120px;padding:15px;border:2px solid #ddd;border-radius:8px;font-size:16px;box-sizing:border-box;resize:none;"
+                                  id="clientNotes"></textarea>
+                    </div>
+                    
+                    <div style="text-align:right;">
                         <button onclick="this.closest('div[style*=position]').remove()" 
                                 style="padding:12px 20px;background:#999;color:white;border:none;border-radius:8px;cursor:pointer;margin-right:10px;">
                             Cancel
@@ -9391,10 +9409,10 @@
             
             document.body.appendChild(modal);
             
-            // Focus textarea
+            // Focus project selector first
             setTimeout(() => {
-                const textarea = document.getElementById('clientNotes');
-                if (textarea) textarea.focus();
+                const projectSelect = document.getElementById('notesProjectSelect');
+                if (projectSelect) projectSelect.focus();
             }, 100);
         }
         
