@@ -2038,7 +2038,7 @@
                     <button class="btn btn-success" onclick="openNewProjectModal()">Create New Project</button>
                 </div>
                 <div class="mobile-only mobile-main-buttons">
-                    <button class="btn mobile-btn notes-btn" onclick="openNotesModal()" ontouchstart="">
+                    <button class="btn mobile-btn notes-btn" onclick="alert('Step 1: Button clicked'); try { openNotesModal(); } catch(e) { alert('ERROR: ' + e.message); }" ontouchstart="">
                         <span class="btn-icon">📝</span>
                         <span class="btn-title">Add Notes</span>
                     </button>
