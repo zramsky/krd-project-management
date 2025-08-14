@@ -9224,244 +9224,9 @@
         let notesAutoSaveTimer = null;
         let currentNoteId = null;
         
-        function showAddNotesModal() {
-            // Ultra-simple test - just show an alert to confirm function runs
-            alert('Add Notes function is working! Building modal...');
-            
-            try {
-                console.log('showAddNotesModal called - working version');
-                console.log('Projects available:', Array.isArray(projects) ? projects.length : 'none');
-                
-                // Create the simplest possible modal
-                const modal = document.createElement('div');
-                modal.style.position = 'fixed';
-                modal.style.top = '0';
-                modal.style.left = '0';
-                modal.style.right = '0';
-                modal.style.bottom = '0';
-                modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-                modal.style.zIndex = '9999';
-                modal.style.display = 'flex';
-                modal.style.alignItems = 'center';
-                modal.style.justifyContent = 'center';
-                
-                const content = document.createElement('div');
-                content.style.backgroundColor = 'white';
-                content.style.padding = '30px';
-                content.style.borderRadius = '20px';
-                content.style.maxWidth = '90%';
-                content.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
-                
-                content.innerHTML = `
-                    <h2 style="margin:0 0 20px 0;color:#333;">Quick Notes</h2>
-                    <p style="color:#666;margin-bottom:20px;">Add your client notes:</p>
-                    <textarea placeholder="Type your notes here..." style="width:100%;height:120px;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:16px;"></textarea>
-                    <div style="margin-top:20px;text-align:right;">
-                        <button onclick="this.closest('div[style*=\"position:fixed\"]').remove()" style="padding:12px 20px;background:#ddd;border:none;border-radius:8px;cursor:pointer;margin-right:10px;">Cancel</button>
-                        <button onclick="alert('Note saved!'); this.closest('div[style*=\"position:fixed\"]').remove()" style="padding:12px 20px;background:#007bff;color:white;border:none;border-radius:8px;cursor:pointer;">Save</button>
-                    </div>
-                `;
-                
-                modal.appendChild(content);
-                document.body.appendChild(modal);
-                
-                console.log('Modal added to document body');
-                
-            } catch (error) {
-                console.error('Error creating modal:', error);
-                alert('Error creating modal: ' + error.message);
-            }
-                
-                // Ensure projects is available and is an array
-                if (!projects || !Array.isArray(projects)) {
-                    // Try to reload from localStorage
-                    projects = JSON.parse(localStorage.getItem('projects') || '[]');
-                    window.projects = projects;
-                    console.log('Reloaded projects from localStorage:', projects.length);
-                }
-                
-                if (!projects || !Array.isArray(projects) || projects.length === 0) {
-                    console.error('No projects available');
-                    showCustomAlert('No projects found. Please create a project first, then try adding notes.');
-                    return;
-                }
-                
-                const modal = document.createElement('div');
-                modal.className = 'modal-overlay';
-                
-                // Get active projects (all projects that aren't completed)
-                const activeProjects = projects.filter(p => !p.status || p.status !== 'completed');
-                console.log('Active projects found:', activeProjects.length);
-                
-                if (activeProjects.length === 0) {
-                    showCustomAlert('All projects are completed. Please create a new project first.');
-                    return;
-                }
-                
-                modal.innerHTML = `
-                    <div class="modal">
-                        <div class="modal-header">
-                            <h3>Quick Note</h3>
-                            <button class="close-modal" onclick="closeNotesModal()">×</button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label>Project</label>
-                                <select id="notesProjectSelect" onchange="handleProjectSelection()" required>
-                                    <option value="">Select project...</option>
-                                    ${activeProjects.map(project => 
-                                        `<option value="${project.id}">${project.name} - ${project.client}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Notes <span id="autoSaveStatus" style="font-size: 12px; color: var(--text-secondary); margin-left: 10px;"></span></label>
-                                <textarea id="notesContent" 
-                                          rows="8" 
-                                          placeholder="Start typing your notes..." 
-                                          oninput="autoSaveNote()"
-                                          disabled></textarea>
-                            </div>
-                            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 10px;">
-                                📅 Today: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-                
-                // Focus on project select
-                setTimeout(() => {
-                    document.getElementById('notesProjectSelect')?.focus();
-                }, 100);
-                
-                console.log('Notes modal created successfully');
-            } catch (error) {
-                console.error('Error in showAddNotesModal:', error);
-                alert('Error opening notes. Please refresh the page and try again.');
-            }
-        }
+        // Old showAddNotesModal function removed - using simpler openNotesModal instead
         
-        function handleProjectSelection() {
-            const projectId = document.getElementById('notesProjectSelect').value;
-            const notesTextarea = document.getElementById('notesContent');
-            
-            if (projectId) {
-                notesTextarea.disabled = false;
-                notesTextarea.focus();
-                
-                // Create a new note ID for this session
-                currentNoteId = Date.now();
-            } else {
-                notesTextarea.disabled = true;
-                currentNoteId = null;
-            }
-        }
-        
-        function autoSaveNote() {
-            const projectId = document.getElementById('notesProjectSelect').value;
-            const content = document.getElementById('notesContent').value;
-            const statusElement = document.getElementById('autoSaveStatus');
-            
-            if (!projectId || !content.trim()) return;
-            
-            // Show saving status
-            statusElement.textContent = '• Saving...';
-            statusElement.style.color = 'var(--warning)';
-            
-            // Clear existing timer
-            if (notesAutoSaveTimer) {
-                clearTimeout(notesAutoSaveTimer);
-            }
-            
-            // Set new timer for auto-save (save after 1 second of no typing)
-            notesAutoSaveTimer = setTimeout(() => {
-                saveNoteToProject(projectId, content, false);
-            }, 1000);
-        }
-        
-        function saveNoteToProject(projectId, content, showAlert = true) {
-            const project = projects.find(p => p.id == projectId);
-            if (!project) return;
-            
-            // Initialize notes array if it doesn't exist
-            if (!project.notes) project.notes = [];
-            
-            // Find existing note with currentNoteId or create new one
-            let note = project.notes.find(n => n.id === currentNoteId);
-            
-            if (note) {
-                // Update existing note
-                note.content = content;
-                note.updatedAt = new Date().toISOString();
-            } else {
-                // Create new note
-                note = {
-                    id: currentNoteId,
-                    date: new Date().toISOString().split('T')[0],
-                    content: content,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                };
-                project.notes.push(note);
-            }
-            
-            // Save to storage
-            saveProjects();
-            
-            // Update status
-            const statusElement = document.getElementById('autoSaveStatus');
-            if (statusElement) {
-                statusElement.textContent = '✓ Saved';
-                statusElement.style.color = 'var(--success)';
-                
-                // Clear status after 2 seconds
-                setTimeout(() => {
-                    if (statusElement) {
-                        statusElement.textContent = '';
-                    }
-                }, 2000);
-            }
-            
-            if (showAlert) {
-                showCustomAlert('Note saved successfully! ✨');
-            }
-        }
-        
-        function closeNotesModal() {
-            // Auto-save any pending changes
-            const projectId = document.getElementById('notesProjectSelect')?.value;
-            const content = document.getElementById('notesContent')?.value;
-            
-            if (projectId && content && content.trim()) {
-                saveNoteToProject(projectId, content, false);
-            }
-            
-            // Clear timer
-            if (notesAutoSaveTimer) {
-                clearTimeout(notesAutoSaveTimer);
-            }
-            
-            // Reset current note ID
-            currentNoteId = null;
-            
-            // Remove modal
-            document.querySelector('.modal-overlay')?.remove();
-        }
-
-        // Legacy function for backward compatibility
-        function saveProjectNotes() {
-            const projectId = document.getElementById('notesProjectSelect').value;
-            const content = document.getElementById('notesContent').value;
-            
-            if (!projectId || !content || !content.trim()) {
-                showCustomAlert('Please select a project and enter notes.');
-                return;
-            }
-            
-            saveNoteToProject(projectId, content, true);
-            closeNotesModal();
-        }
+        // Old complex notes functions removed - using simple openNotesModal instead
 
         function showMobileAddEventModal() {
             const modal = document.createElement('div');
@@ -9598,7 +9363,7 @@
         window.showMobileProjectsView = function() { alert('Open Projects feature coming soon!'); };
         
         // Add Notes modal function - defined with other mobile functions
-        window.openNotesModal = function() {
+        function openNotesModal() {
             console.log('openNotesModal called');
             alert('Creating notes modal...');
             
@@ -9632,7 +9397,10 @@
                 const textarea = document.getElementById('clientNotes');
                 if (textarea) textarea.focus();
             }, 100);
-        };
+        }
+        
+        // Make it globally available
+        window.openNotesModal = openNotesModal;
         
         console.log('Kelly Ram Designs - Mobile functions loaded at script start');
         
