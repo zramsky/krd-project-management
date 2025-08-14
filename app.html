@@ -5791,7 +5791,12 @@
         
         // Function to add a note from desktop
         function addProjectNote() {
-            if (!currentProject) return;
+            if (!currentProject) {
+                alert('No project selected!');
+                return;
+            }
+            
+            alert('Add Note button clicked! Project: ' + currentProject.name);
             
             showCustomPrompt(
                 'Add Note',
