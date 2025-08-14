@@ -9634,7 +9634,7 @@
                                 style="padding:12px 20px;background:#999;color:white;border:none;border-radius:8px;cursor:pointer;margin-right:10px;">
                             Cancel
                         </button>
-                        <button onclick="alert('Note saved for client visit!'); this.closest('div[style*=position]').remove()" 
+                        <button onclick="saveNoteFromModal()" 
                                 style="padding:12px 20px;background:#007bff;color:white;border:none;border-radius:8px;cursor:pointer;">
                             Save Note
                         </button>
@@ -9649,6 +9649,53 @@
                 const projectSelect = document.getElementById('notesProjectSelect');
                 if (projectSelect) projectSelect.focus();
             }, 100);
+        };
+        
+        // Function to save note from mobile modal
+        window.saveNoteFromModal = function() {
+            const projectId = document.getElementById('notesProjectSelect').value;
+            const noteContent = document.getElementById('clientNotes').value;
+            
+            if (!projectId) {
+                alert('Please select a project first.');
+                return;
+            }
+            
+            if (!noteContent || !noteContent.trim()) {
+                alert('Please enter some notes before saving.');
+                return;
+            }
+            
+            // Find the project
+            const project = window.projects.find(p => p.id == projectId);
+            if (!project) {
+                alert('Project not found. Please try again.');
+                return;
+            }
+            
+            // Initialize notes array if it doesn't exist
+            if (!project.notes) project.notes = [];
+            
+            // Create new note with same structure as desktop notes
+            const newNote = {
+                id: Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                content: noteContent.trim(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Add note to project
+            project.notes.push(newNote);
+            
+            // Save to localStorage and Firebase
+            saveProjects();
+            
+            // Close modal
+            document.querySelector('div[style*="position:fixed"]').remove();
+            
+            // Show success message
+            alert('Note saved successfully! 📝\n\nYou can view it in the Project Notes section when you open the project details.');
         };
         
         console.log('Kelly Ram Designs - Mobile functions loaded at script start');
