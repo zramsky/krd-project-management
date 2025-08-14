@@ -1970,7 +1970,7 @@
                 if (project.events) {
                     project.events.forEach(event => {
                         if (!event.completed) {
-                            const dateKey = new Date(event.date).toDateString();
+                            const dateKey = new Date(event.date + 'T00:00:00').toDateString();
                             if (!calendarEvents[dateKey]) {
                                 calendarEvents[dateKey] = [];
                             }
@@ -2426,7 +2426,7 @@
                     saveProjects();
                     
                     // Refresh the day view
-                    const selectedDate = new Date(event.date);
+                    const selectedDate = new Date(event.date + 'T00:00:00');
                     closeDayViewModal();
                     updateEventsCalendar();
                     
@@ -4867,7 +4867,7 @@
             
             if (currentProject.events) {
                 currentProject.events.forEach((event, index) => {
-                    const eventDate = new Date(event.date);
+                    const eventDate = new Date(event.date + 'T00:00:00');
                     const today = new Date();
                     if (eventDate >= today && !event.completed) {
                         upcomingEvents.push({...event, originalIndex: index});
@@ -4896,7 +4896,7 @@
                             <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${event.title}</div>
                             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 2px;">${event.notes || 'No notes'}</div>
                             <div style="display: flex; gap: 15px; font-size: 12px; color: var(--text-secondary);">
-                                <span>📅 ${new Date(event.date).toLocaleDateString()}</span>
+                                <span>📅 ${new Date(event.date + 'T00:00:00').toLocaleDateString()}</span>
                                 <span>🕐 ${event.time || 'No time set'}</span>
                                 ${event.type ? `<span style="background: ${getEventTypeColor(event.type)}; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; text-transform: capitalize;">${event.type}</span>` : ''}
                         </div>
