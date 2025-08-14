@@ -2038,7 +2038,7 @@
                     <button class="btn btn-success" onclick="openNewProjectModal()">Create New Project</button>
                 </div>
                 <div class="mobile-only mobile-main-buttons">
-                    <button class="btn mobile-btn notes-btn" onclick="alert('Add Notes button works!')" ontouchstart="">
+                    <button class="btn mobile-btn notes-btn" onclick="openNotesModal()" ontouchstart="">
                         <span class="btn-icon">📝</span>
                         <span class="btn-title">Add Notes</span>
                     </button>
@@ -2433,48 +2433,7 @@
     </style>
 
     <script>
-        // DEFINE FUNCTION EXACTLY LIKE THE WORKING TEST PAGE
-        function openNotesModal() {
-            console.log('openNotesModal called');
-            alert('Creating notes modal...');
-            
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
-            
-            modal.innerHTML = `
-                <div style="background:white;padding:30px;border-radius:15px;max-width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-                    <h2 style="margin:0 0 15px 0;color:#333;">Quick Notes</h2>
-                    <p style="color:#666;margin-bottom:15px;">Add your notes for this client visit:</p>
-                    <textarea placeholder="Type your notes here..." 
-                              style="width:100%;height:120px;padding:15px;border:2px solid #ddd;border-radius:8px;font-size:16px;box-sizing:border-box;resize:none;"
-                              id="clientNotes"></textarea>
-                    <div style="margin-top:20px;text-align:right;">
-                        <button onclick="this.closest('div[style*=position]').remove()" 
-                                style="padding:12px 20px;background:#999;color:white;border:none;border-radius:8px;cursor:pointer;margin-right:10px;">
-                            Cancel
-                        </button>
-                        <button onclick="alert('Note saved for client visit!'); this.closest('div[style*=position]').remove()" 
-                                style="padding:12px 20px;background:#007bff;color:white;border:none;border-radius:8px;cursor:pointer;">
-                            Save Note
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Focus textarea
-            setTimeout(() => {
-                const textarea = document.getElementById('clientNotes');
-                if (textarea) textarea.focus();
-            }, 100);
-        }
-        
-        // Make it available globally too
-        window.openNotesModal = openNotesModal;
-        
-        console.log('openNotesModal defined:', typeof openNotesModal);
-        console.log('window.openNotesModal defined:', typeof window.openNotesModal);
+        // Notes modal function moved to end of script with other mobile functions
         
         // Sample data with enhanced structure
         // Global variables
@@ -9637,6 +9596,43 @@
         // Other mobile functions
         window.showMobileAddEventModal = function() { alert('Add Event feature coming soon!'); };
         window.showMobileProjectsView = function() { alert('Open Projects feature coming soon!'); };
+        
+        // Add Notes modal function - defined with other mobile functions
+        window.openNotesModal = function() {
+            console.log('openNotesModal called');
+            alert('Creating notes modal...');
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+            
+            modal.innerHTML = `
+                <div style="background:white;padding:30px;border-radius:15px;max-width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+                    <h2 style="margin:0 0 15px 0;color:#333;">Quick Notes</h2>
+                    <p style="color:#666;margin-bottom:15px;">Add your notes for this client visit:</p>
+                    <textarea placeholder="Type your notes here..." 
+                              style="width:100%;height:120px;padding:15px;border:2px solid #ddd;border-radius:8px;font-size:16px;box-sizing:border-box;resize:none;"
+                              id="clientNotes"></textarea>
+                    <div style="margin-top:20px;text-align:right;">
+                        <button onclick="this.closest('div[style*=position]').remove()" 
+                                style="padding:12px 20px;background:#999;color:white;border:none;border-radius:8px;cursor:pointer;margin-right:10px;">
+                            Cancel
+                        </button>
+                        <button onclick="alert('Note saved for client visit!'); this.closest('div[style*=position]').remove()" 
+                                style="padding:12px 20px;background:#007bff;color:white;border:none;border-radius:8px;cursor:pointer;">
+                            Save Note
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Focus textarea
+            setTimeout(() => {
+                const textarea = document.getElementById('clientNotes');
+                if (textarea) textarea.focus();
+            }, 100);
+        };
         
         console.log('Kelly Ram Designs - Mobile functions loaded at script start');
         
