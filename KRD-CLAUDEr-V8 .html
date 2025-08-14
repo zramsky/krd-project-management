@@ -2440,6 +2440,58 @@
         let currentProject = null;
         let invoiceCounter = parseInt(localStorage.getItem('invoiceCounter') || '1204');
 
+        // DEFINE MOBILE FUNCTIONS IMMEDIATELY - BEFORE ANYTHING ELSE
+        window.openNotesModal = function() {
+            alert('Step 1: Function called successfully!');
+            
+            // Test basic DOM manipulation first
+            try {
+                const testDiv = document.createElement('div');
+                testDiv.innerHTML = 'TEST';
+                alert('Step 2: DOM createElement works!');
+                
+                document.body.appendChild(testDiv);
+                alert('Step 3: DOM appendChild works!');
+                
+                testDiv.remove();
+                alert('Step 4: DOM remove works!');
+            } catch (e) {
+                alert('DOM ERROR: ' + e.message);
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+            
+            modal.innerHTML = `
+                <div style="background:white;margin:20px;padding:30px;border-radius:15px;width:90%;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+                    <h2 style="margin:0 0 15px 0;color:#333;font-size:22px;">Quick Notes</h2>
+                    <p style="color:#666;margin-bottom:15px;font-size:14px;">Add your notes for this client visit:</p>
+                    <textarea placeholder="Type your notes here..." 
+                              style="width:100%;height:120px;padding:15px;border:2px solid #ddd;border-radius:8px;font-size:16px;font-family:inherit;resize:none;box-sizing:border-box;"
+                              id="noteText"></textarea>
+                    <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
+                        <button onclick="this.closest('div[style*=position]').remove()" 
+                                style="padding:12px 20px;background:#999;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">
+                            Cancel
+                        </button>
+                        <button onclick="alert('Note saved for client!'); this.closest('div[style*=position]').remove()" 
+                                style="padding:12px 20px;background:#007bff;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">
+                            Save Note
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Focus the textarea
+            setTimeout(() => {
+                const textarea = document.getElementById('noteText');
+                if (textarea) textarea.focus();
+            }, 100);
+        };
+
         // Firebase Database Helper Functions
         async function saveProjects() {
             try {
@@ -9590,63 +9642,11 @@
             }
         }
 
-        // Create a brand new simple notes function
-        window.openNotesModal = function() {
-            alert('Step 1: Function called successfully!');
-            
-            // Test basic DOM manipulation first
-            try {
-                const testDiv = document.createElement('div');
-                testDiv.innerHTML = 'TEST';
-                alert('Step 2: DOM createElement works!');
-                
-                document.body.appendChild(testDiv);
-                alert('Step 3: DOM appendChild works!');
-                
-                testDiv.remove();
-                alert('Step 4: DOM remove works!');
-            } catch (e) {
-                alert('DOM ERROR: ' + e.message);
-                return;
-            }
-            
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-            
-            modal.innerHTML = `
-                <div style="background:white;margin:20px;padding:30px;border-radius:15px;width:90%;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-                    <h2 style="margin:0 0 15px 0;color:#333;font-size:22px;">Quick Notes</h2>
-                    <p style="color:#666;margin-bottom:15px;font-size:14px;">Add your notes for this client visit:</p>
-                    <textarea placeholder="Type your notes here..." 
-                              style="width:100%;height:120px;padding:15px;border:2px solid #ddd;border-radius:8px;font-size:16px;font-family:inherit;resize:none;box-sizing:border-box;"
-                              id="noteText"></textarea>
-                    <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
-                        <button onclick="this.closest('div[style*=position]').remove()" 
-                                style="padding:12px 20px;background:#999;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">
-                            Cancel
-                        </button>
-                        <button onclick="alert('Note saved for client!'); this.closest('div[style*=position]').remove()" 
-                                style="padding:12px 20px;background:#007bff;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">
-                            Save Note
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Focus the textarea
-            setTimeout(() => {
-                const textarea = document.getElementById('noteText');
-                if (textarea) textarea.focus();
-            }, 100);
-        };
-        
-        // Make other functions available
+        // Other mobile functions
         window.showMobileAddEventModal = function() { alert('Add Event feature coming soon!'); };
         window.showMobileProjectsView = function() { alert('Open Projects feature coming soon!'); };
         
-        console.log('Kelly Ram Designs - New mobile functions loaded successfully');
+        console.log('Kelly Ram Designs - Mobile functions loaded at script start');
         
         // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', initializeApp);
