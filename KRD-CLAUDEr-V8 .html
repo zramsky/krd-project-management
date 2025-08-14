@@ -9691,6 +9691,13 @@
             // Save to localStorage and Firebase
             saveProjects();
             
+            // If this project is currently open in details, refresh the notes display
+            if (window.currentProject && window.currentProject.id == projectId) {
+                if (typeof updateProjectNotes === 'function') {
+                    updateProjectNotes();
+                }
+            }
+            
             // Close modal
             document.querySelector('div[style*="position:fixed"]').remove();
             
