@@ -2034,15 +2034,15 @@
                     <button class="btn btn-success" onclick="openNewProjectModal()">Create New Project</button>
                 </div>
                 <div class="mobile-only mobile-main-buttons">
-                    <button class="btn mobile-btn notes-btn" onclick="showAddNotesModal()" ontouchstart="">
+                    <button class="btn mobile-btn notes-btn" onclick="alert('Button clicked! Function: ' + typeof showAddNotesModal); try { showAddNotesModal(); } catch(e) { alert('Error: ' + e.message); }" ontouchstart="">
                         <span class="btn-icon">📝</span>
                         <span class="btn-title">Add Notes</span>
                     </button>
-                    <button class="btn mobile-btn event-btn" onclick="showMobileAddEventModal()" ontouchstart="">
+                    <button class="btn mobile-btn event-btn" onclick="alert('Event button clicked - not implemented yet')" ontouchstart="">
                         <span class="btn-icon">📅</span>
                         <span class="btn-title">Add Event</span>
                     </button>
-                    <button class="btn mobile-btn projects-btn" onclick="showMobileProjectsView()" ontouchstart="">
+                    <button class="btn mobile-btn projects-btn" onclick="alert('Projects button clicked - not implemented yet')" ontouchstart="">
                         <span class="btn-icon">📁</span>
                         <span class="btn-title">Open Projects</span>
                     </button>
@@ -2467,13 +2467,13 @@
                         lastUpdated: new Date().toISOString()
                     });
                     console.log('Invoice counter saved to Firebase');
-                } else {
-                    saveInvoiceCounter();
                 }
             } catch (error) {
                 console.error('Error saving invoice counter:', error);
-                saveInvoiceCounter();
             }
+            
+            // Always save to localStorage as backup
+            localStorage.setItem('invoiceCounter', invoiceCounter.toString());
         }
 
         async function loadProjects() {
