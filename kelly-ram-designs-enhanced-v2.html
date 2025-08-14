@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelly Ram Designs - Enhanced Project Management System v2</title>
+    <!-- html2pdf library for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* Import Inter font */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -39,6 +41,11 @@
             --warning: #D8C690;           /* Muted Gold */
             --error: #E2A39D;             /* Soft Terracotta */
             --info: #9CAEC2;              /* Slate Blue */
+            
+            /* Additional Variables */
+            --dusty-blue: #9CAEC2;        /* Same as secondary-brand */
+            --lavender-mist: #CBBEDC;     /* Same as calendar-bg */
+            --soft-rose: #D8A7A7;         /* Same as primary-brand */
         }
 
         body {
@@ -806,11 +813,11 @@
             </div>
             <div class="modal-body">
                 <div class="project-tabs">
-                    <button class="project-tab active" onclick="showProjectSection('overview')">Details</button>
-                    <button class="project-tab" onclick="showProjectSection('items')">Items</button>
-                    <button class="project-tab" onclick="showProjectSection('orders')">Orders</button>
-                    <button class="project-tab" onclick="showProjectSection('moodboards')">Mood Boards</button>
-                    <button class="project-tab" onclick="showProjectSection('invoice')">Invoice</button>
+                    <button class="project-tab active" onclick="showProjectSection('overview', this)">Details</button>
+                    <button class="project-tab" onclick="showProjectSection('items', this)">Items</button>
+                    <button class="project-tab" onclick="showProjectSection('orders', this)">Orders</button>
+                    <button class="project-tab" onclick="showProjectSection('moodboards', this)">Mood Boards</button>
+                    <button class="project-tab" onclick="showProjectSection('invoice', this)">Invoice</button>
                 </div>
 
                 <!-- Project Details Section -->
@@ -825,7 +832,9 @@
                             <p style="margin: 8px 0; font-size: 14px;"><strong>Client:</strong> <span id="detailClientName"></span></p>
                             <p style="margin: 8px 0; font-size: 14px;"><strong>Email:</strong> <span id="detailClientEmail"></span></p>
                             <p style="margin: 8px 0; font-size: 14px;"><strong>Phone:</strong> <span id="detailClientPhone"></span></p>
+                            <p style="margin: 8px 0; font-size: 14px;"><strong>Address:</strong> <span id="detailClientAddress"></span></p>
                             <p style="margin: 8px 0; font-size: 14px;"><strong>Status:</strong> <span id="detailStatus"></span></p>
+                            <p style="margin: 8px 0; font-size: 14px;"><strong>Start Date:</strong> <span id="detailStartDate"></span></p>
                             <p style="margin: 8px 0; font-size: 14px;"><strong>Budget:</strong> <span id="detailBudget"></span></p>
                         </div>
                         
@@ -834,6 +843,10 @@
                             <div style="text-align: center; padding: 12px; background: var(--task-bg); border-radius: 8px; margin-bottom: 10px;">
                                 <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);" id="detailHoursWorked">0</div>
                                 <div style="font-size: 11px; color: var(--text-secondary);">Worked</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--info); border-radius: 8px; margin-bottom: 10px;">
+                                <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);" id="detailHoursPaid">0</div>
+                                <div style="font-size: 11px; color: var(--text-secondary);">Paid Hours</div>
                             </div>
                             <div style="text-align: center; padding: 12px; background: var(--success); border-radius: 8px;">
                                 <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);" id="detailHoursRemaining">0</div>
@@ -844,7 +857,7 @@
                         <div class="card">
                             <h4 style="margin: 0 0 10px 0; font-size: 16px;">Quick Actions</h4>
                             <button class="btn btn-success" onclick="addEvent()" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">📅 Add Event</button>
-                            <button class="btn btn-coral" onclick="showProjectSection('invoice')" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">📄 Generate Invoice</button>
+                            <button class="btn btn-coral" onclick="showProjectSection('invoice', this)" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">📄 Generate Invoice</button>
                             <button class="btn" onclick="logProjectHours()" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px;">⏰ Log Hours</button>
                             <button class="btn" onclick="addPaidHours()" style="margin: 4px 0; width: 100%; padding: 10px 15px; font-size: 14px; background: linear-gradient(135deg, var(--primary-brand), var(--client-bg)); color: white;">💰 Add Paid Hours</button>
                         </div>
@@ -854,6 +867,12 @@
                     <div class="card" style="margin-top: 20px;">
                         <h4 style="margin-top: 0; font-size: 16px;">Upcoming Events</h4>
                         <div id="projectUpcomingEvents"></div>
+                    </div>
+                    
+                    <!-- Project Notes -->
+                    <div class="card" style="margin-top: 20px;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 16px;">Project Notes</h4>
+                        <p id="detailNotes" style="font-size: 14px; line-height: 1.5; color: var(--text-secondary);"></p>
                     </div>
                 </div>
 
@@ -923,10 +942,15 @@
 
                 <!-- Invoice Section -->
                 <div id="invoice" class="project-section">
-                    <div style="margin-bottom: 20px;">
-                        <button class="btn btn-success" onclick="generateProjectInvoice()">Generate Invoice</button>
-                        <button class="btn btn-coral" onclick="printInvoice()" style="margin-left: 10px;">Print Invoice</button>
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="margin: 0 0 15px 0; color: var(--text-primary);">Generate Invoices by Section</h3>
+                        <p style="margin: 0 0 20px 0; color: var(--text-secondary); font-size: 14px;">Create separate invoices for each project section/category. This allows for flexible billing and payment tracking.</p>
+                        
+                        <div id="sectionInvoiceList" style="display: grid; gap: 15px;">
+                            <!-- Section invoice options will be populated here -->
+                        </div>
                     </div>
+                    
                     <div class="invoice-preview" id="projectInvoicePreview">
                         <!-- Invoice preview will be populated here -->
                     </div>
@@ -940,6 +964,30 @@
         let projects = JSON.parse(localStorage.getItem('projects') || '[]');
         let currentProject = null;
         let invoiceCounter = parseInt(localStorage.getItem('invoiceCounter') || '1204');
+        
+        // Migrate old project format to new pricing structure
+        function migrateOldProjects() {
+            let needsSaving = false;
+            projects.forEach(project => {
+                if (project.sections) {
+                    project.sections.forEach(section => {
+                        section.items.forEach(item => {
+                            // If item has old 'price' field but no 'customerPrice', migrate it
+                            if (item.price && !item.customerPrice) {
+                                item.customerPrice = item.price;
+                                item.wholesalePrice = item.price * 0.7; // Estimate 30% markup
+                                item.shipping = 0;
+                                item.tax = 0;
+                                needsSaving = true;
+                            }
+                        });
+                    });
+                }
+            });
+            if (needsSaving) {
+                localStorage.setItem('projects', JSON.stringify(projects));
+            }
+        }
 
         // Add sample project with enhanced data if none exist
         if (projects.length === 0) {
@@ -961,16 +1009,16 @@
                         id: 1,
                         name: "Reception Area",
                         items: [
-                            { id: 1, name: "Reception Desk", qty: 1, price: 899.00, link: "https://example.com/desk", readyToOrder: true, orderStatus: "pending" },
-                            { id: 2, name: "Waiting Chairs", qty: 4, price: 249.00, link: "https://example.com/chairs", readyToOrder: false, orderStatus: "pending" }
+                            { id: 1, name: "Reception Desk", qty: 1, customerPrice: 899.00, wholesalePrice: 650.00, shipping: 75.00, tax: 67.43, link: "https://example.com/desk", readyToOrder: true, orderStatus: "pending" },
+                            { id: 2, name: "Waiting Chairs", qty: 4, customerPrice: 249.00, wholesalePrice: 175.00, shipping: 25.00, tax: 79.84, link: "https://example.com/chairs", readyToOrder: false, orderStatus: "pending" }
                         ]
                     },
                     {
                         id: 2,
                         name: "Conference Room",
                         items: [
-                            { id: 3, name: "Conference Table", qty: 1, price: 1299.00, link: "https://example.com/table", readyToOrder: true, orderStatus: "pending" },
-                            { id: 4, name: "Conference Chairs", qty: 8, price: 189.00, link: "https://example.com/conf-chairs", readyToOrder: true, orderStatus: "pending" }
+                            { id: 3, name: "Conference Table", qty: 1, customerPrice: 1299.00, wholesalePrice: 950.00, shipping: 125.00, tax: 113.99, link: "https://example.com/table", readyToOrder: true, orderStatus: "pending" },
+                            { id: 4, name: "Conference Chairs", qty: 8, customerPrice: 189.00, wholesalePrice: 135.00, shipping: 15.00, tax: 12.32, link: "https://example.com/conf-chairs", readyToOrder: true, orderStatus: "pending" }
                         ]
                     }
                 ],
@@ -1125,14 +1173,17 @@
                 
                 const card = document.createElement('div');
                 card.className = 'project-card';
-                card.onclick = () => openProjectDetail(project.id);
                 
+                // Set innerHTML FIRST, then add event listeners
                 card.innerHTML = `
                     <div class="project-header" style="position: relative;">
                         <h3 class="project-title">${project.name}</h3>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span class="project-status status-${project.status}">${project.status}</span>
-                            <button onclick="event.stopPropagation(); deleteProject(${project.id})" 
+                            <button class="project-open-btn" data-project-id="${project.id}"
+                                    style="background: var(--primary-brand); color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-weight: 500;"
+                                    title="Open Project">Open</button>
+                            <button class="project-delete-btn" data-project-id="${project.id}"
                                     style="background: var(--error); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
                                     title="Delete Project">×</button>
                         </div>
@@ -1183,6 +1234,27 @@
                         <span class="project-value">$${projectTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                 `;
+                
+                // Add event listeners AFTER innerHTML is set
+                const openBtn = card.querySelector('.project-open-btn');
+                const deleteBtn = card.querySelector('.project-delete-btn');
+                
+                openBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openProjectDetail(project.id);
+                });
+                
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteProject(project.id);
+                });
+                
+                // Also allow clicking anywhere on the card (except buttons)
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('button')) {
+                        openProjectDetail(project.id);
+                    }
+                });
                 
                 grid.appendChild(card);
             });
@@ -1236,6 +1308,8 @@
                 invoiceNumber: currentProject ? currentProject.invoiceNumber : (++invoiceCounter).toString().padStart(6, '0'),
                 amountPaid: currentProject ? currentProject.amountPaid : 0
             };
+            
+            const isNewProject = !currentProject;
 
             if (currentProject) {
                 const index = projects.findIndex(p => p.id === currentProject.id);
@@ -1250,6 +1324,24 @@
             closeProjectModal();
             displayProjects();
             updateDashboard();
+            
+            // If this is a new project, automatically open it for the user
+            if (isNewProject) {
+                // Ensure projects list is updated first
+                displayProjects();
+                
+                // Use requestAnimationFrame for better timing
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        try {
+                            openProjectDetail(project.id);
+                        } catch (error) {
+                            console.error('Error auto-opening project:', error);
+                            showCustomAlert('Project saved! Click on the project card to open it.');
+                        }
+                    }, 150);
+                });
+            }
             
             showCustomAlert('Project saved successfully! ✨');
         }
@@ -1284,33 +1376,56 @@
         }
 
         function openProjectDetail(projectId) {
-            const project = projects.find(p => p.id === projectId);
-            if (!project) return;
+            try {
+                const project = projects.find(p => p.id === projectId);
+                if (!project) {
+                    showCustomAlert('Project not found. Please refresh the page and try again.');
+                    return;
+                }
+                
+                currentProject = project;
+                
+                // Check if required elements exist before accessing them
+                const titleElement = document.getElementById('projectDetailTitle');
+                const clientElement = document.getElementById('projectDetailClient');
+                
+                if (titleElement) titleElement.textContent = project.name;
+                if (clientElement) clientElement.textContent = `Client: ${project.client}`;
+                
+                // Populate project details with safety checks
+                const safeSetText = (id, value) => {
+                    const element = document.getElementById(id);
+                    if (element) element.textContent = value;
+                };
+                
+                safeSetText('detailClientName', project.client);
+                safeSetText('detailClientEmail', project.clientEmail || 'Not provided');
+                safeSetText('detailClientPhone', project.clientPhone || 'Not provided');
+                safeSetText('detailClientAddress', project.clientAddress || 'Not provided');
+                safeSetText('detailStatus', project.status);
+                safeSetText('detailStartDate', new Date(project.startDate).toLocaleDateString());
+                safeSetText('detailBudget', project.budget ? `$${project.budget.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'No budget set');
+                safeSetText('detailHoursWorked', `${(project.hoursWorked || 0).toFixed(1)}h`);
+                safeSetText('detailHoursPaid', `${(project.hoursPaid || 0).toFixed(1)}h`);
+                safeSetText('detailHoursRemaining', `${((project.hoursPaid || 0) - (project.hoursWorked || 0)).toFixed(1)}h`);
+                safeSetText('detailNotes', project.notes || 'No notes available.');
             
-            currentProject = project;
-            
-            document.getElementById('projectDetailTitle').textContent = project.name;
-            document.getElementById('projectDetailClient').textContent = `Client: ${project.client}`;
-            
-            // Populate project details
-            document.getElementById('detailClientName').textContent = project.client;
-            document.getElementById('detailClientEmail').textContent = project.clientEmail || 'Not provided';
-            document.getElementById('detailClientPhone').textContent = project.clientPhone || 'Not provided';
-            document.getElementById('detailClientAddress').textContent = project.clientAddress || 'Not provided';
-            document.getElementById('detailStatus').textContent = project.status;
-            document.getElementById('detailStartDate').textContent = new Date(project.startDate).toLocaleDateString();
-            document.getElementById('detailBudget').textContent = project.budget ? `$${project.budget.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'No budget set';
-            document.getElementById('detailHoursWorked').textContent = `${(project.hoursWorked || 0).toFixed(1)}h`;
-            document.getElementById('detailHoursPaid').textContent = `${(project.hoursPaid || 0).toFixed(1)}h`;
-            document.getElementById('detailHoursRemaining').textContent = `${((project.hoursPaid || 0) - (project.hoursWorked || 0)).toFixed(1)}h`;
-            document.getElementById('detailNotes').textContent = project.notes || 'No notes available.';
-            
-            showProjectSection('overview');
-            updateProjectSections();
-            updateProjectHours();
-            updateProjectUpcomingEvents();
-            
-            document.getElementById('projectDetailModal').style.display = 'block';
+                showProjectSection('overview');
+                updateProjectSections();
+                updateProjectHours();
+                updateProjectUpcomingEvents();
+                
+                const modal = document.getElementById('projectDetailModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                } else {
+                    throw new Error('Project detail modal not found');
+                }
+                
+            } catch (error) {
+                console.error('Error opening project detail:', error);
+                showCustomAlert('Error opening project details. Please try again.');
+            }
         }
         
         // Function to edit project information
@@ -1367,7 +1482,7 @@
             currentProject = null;
         }
 
-        function showProjectSection(sectionName) {
+        function showProjectSection(sectionName, element) {
             document.querySelectorAll('.project-section').forEach(section => {
                 section.classList.remove('active');
             });
@@ -1376,7 +1491,15 @@
             });
             
             document.getElementById(sectionName).classList.add('active');
-            event.target.classList.add('active');
+            
+            // Use the passed element or find the clicked tab
+            if (element) {
+                element.classList.add('active');
+            } else {
+                // Fallback: find the tab by section name
+                const tabButton = document.querySelector(`button.project-tab[onclick*="${sectionName}"]`);
+                if (tabButton) tabButton.classList.add('active');
+            }
             
             if (sectionName === 'items') {
                 updateProjectSections();
@@ -1384,6 +1507,8 @@
                 updateReadyToOrderItems();
             } else if (sectionName === 'moodboards') {
                 updateMoodBoards();
+            } else if (sectionName === 'invoice') {
+                updateSectionInvoiceList();
             }
         }
 
@@ -1422,15 +1547,15 @@
                     </div>
                     <div class="section-content" id="section-${sectionIndex}">
                         <div class="item-grid header">
-                            <div>Item</div>
+                            <div>Item Name</div>
                             <div>Qty</div>
-                            <div>Wholesale Price</div>
-                            <div>Customer Unit Price</div>
-                            <div>Shipping</div>
-                            <div>Tax</div>
-                            <div>Total Customer Price</div>
-                            <div>Link</div>
-                            <div>Ready</div>
+                            <div>Cost<br><small style="opacity: 0.7;">(Wholesale)</small></div>
+                            <div>Sell Price<br><small style="opacity: 0.7;">(Per Unit)</small></div>
+                            <div>Shipping<br><small style="opacity: 0.7;">($)</small></div>
+                            <div>Tax<br><small style="opacity: 0.7;">($)</small></div>
+                            <div>Customer Total<br><small style="opacity: 0.7;">(Final Price)</small></div>
+                            <div>Product Link</div>
+                            <div>Order Status</div>
                         </div>
                         ${section.items.map((item, itemIndex) => `
                             <div class="item-grid">
@@ -1474,10 +1599,10 @@
                                 <div>
                                     ${item.link ? 
                                         `<div style="display: flex; align-items: center; gap: 4px;">
-                                            <a href="${item.link}" target="_blank" style="color: var(--secondary-brand); text-decoration: none; font-weight: 500; font-size: 12px;">Link</a>
-                                            <button onclick="editItemLink(${sectionIndex}, ${itemIndex})" style="background: none; border: 1px solid var(--section-bg); border-radius: 3px; padding: 1px 4px; font-size: 10px; cursor: pointer;">✏️</button>
+                                            <a href="${item.link}" target="_blank" style="color: var(--secondary-brand); text-decoration: none; font-weight: 500; font-size: 12px;">🔗 View</a>
+                                            <button onclick="editItemLink(${sectionIndex}, ${itemIndex})" style="background: none; border: 1px solid var(--section-bg); border-radius: 3px; padding: 1px 4px; font-size: 10px; cursor: pointer;" title="Edit Link">✏️</button>
                                         </div>` :
-                                        `<button onclick="editItemLink(${sectionIndex}, ${itemIndex})" style="background: var(--section-bg); border: 1px solid var(--section-bg); border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; color: var(--text-secondary);">+ Link</button>`
+                                        `<button onclick="editItemLink(${sectionIndex}, ${itemIndex})" style="background: var(--section-bg); border: 1px solid var(--section-bg); border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; color: var(--text-secondary);">+ Add Link</button>`
                                     }
                                 </div>
                                 <div>
@@ -1498,7 +1623,7 @@
                                             "
                                             onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)'"
                                             onmouseout="this.style.transform='translateY(0px)'; this.style.boxShadow='0 1px 4px rgba(0,0,0,0.1)'">
-                                        ${item.readyToOrder ? 'Ready to Order' : 'Ready to Order'}
+                                        ${item.readyToOrder ? '✓ READY' : 'Mark Ready'}
                                     </button>
                                 </div>
                             </div>
@@ -1543,15 +1668,15 @@
 
         function addItemToSection(sectionIndex) {
             showCustomPrompt(
-                'Add Item',
+                'Add New Item',
                 [
-                    { type: 'text', name: 'itemName', label: 'Item Name', required: true },
+                    { type: 'text', name: 'itemName', label: 'Item Name', required: true, placeholder: 'e.g. Sofa, Chair, Table...' },
                     { type: 'number', name: 'quantity', label: 'Quantity', required: true, defaultValue: '1' },
-                    { type: 'number', name: 'wholesalePrice', label: 'Wholesale Price ($)', step: '0.01', placeholder: '0.00' },
-                    { type: 'number', name: 'customerPrice', label: 'Customer Unit Price ($)', step: '0.01', required: true },
-                    { type: 'number', name: 'shipping', label: 'Shipping ($)', step: '0.01', placeholder: '0.00' },
-                    { type: 'number', name: 'tax', label: 'Tax ($)', step: '0.01', placeholder: '0.00' },
-                    { type: 'url', name: 'link', label: 'Product Link', placeholder: 'https://...' }
+                    { type: 'number', name: 'wholesalePrice', label: 'Your Cost (Wholesale Price)', step: '0.01', placeholder: '0.00' },
+                    { type: 'number', name: 'customerPrice', label: 'Sell Price (What Customer Pays Per Unit)', step: '0.01', required: true },
+                    { type: 'number', name: 'shipping', label: 'Shipping Cost', step: '0.01', placeholder: '0.00' },
+                    { type: 'number', name: 'tax', label: 'Tax Amount', step: '0.01', placeholder: '0.00' },
+                    { type: 'url', name: 'link', label: 'Product Website Link', placeholder: 'https://store.com/product-page' }
                 ],
                 (data) => {
                     const customerPrice = parseFloat(data.customerPrice) || 0;
@@ -1688,7 +1813,7 @@
             updateOrderProgress(readyItems);
             
             if (readyItems.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No items ready to order. Mark items as "Ready to Order" in the Items tab.</p>';
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No items ready to order yet. Go to the Items tab and click "Mark Ready" on items you want to order.</p>';
                 return;
             }
             
@@ -1886,6 +2011,615 @@
             }
         }
 
+        function updateSectionInvoiceList() {
+            if (!currentProject || !currentProject.sections) return;
+            
+            const container = document.getElementById('sectionInvoiceList');
+            
+            if (currentProject.sections.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No sections available. Add items in the Items tab to create invoices.</p>';
+                return;
+            }
+            
+            // Filter sections that have items
+            const sectionsWithItems = currentProject.sections.filter(section => 
+                section.items && section.items.length > 0
+            );
+            
+            if (sectionsWithItems.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No sections with items available. Add items to your sections in the Items tab to create invoices.</p>';
+                return;
+            }
+            
+            container.innerHTML = currentProject.sections.map((section, sectionIndex) => {
+                const hasItems = section.items && section.items.length > 0;
+                const sectionTotal = hasItems ? section.items.reduce((total, item) => {
+                    const customerUnitPrice = item.customerPrice || item.price || 0;
+                    const quantity = item.qty || 1;
+                    const unitTotal = customerUnitPrice * quantity;
+                    const totalWithShippingTax = unitTotal + (item.shipping || 0) + (item.tax || 0);
+                    return total + totalWithShippingTax;
+                }, 0) : 0;
+                
+                const itemCount = hasItems ? section.items.length : 0;
+                
+                return `
+                    <div class="card" style="padding: 20px; ${!hasItems ? 'opacity: 0.6; border: 2px dashed var(--section-bg);' : ''}">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div>
+                                <h4 style="margin: 0; color: var(--text-primary);">${section.name}</h4>
+                                <p style="margin: 5px 0 0 0; color: var(--text-secondary); font-size: 13px;">
+                                    ${hasItems 
+                                        ? `${itemCount} item${itemCount === 1 ? '' : 's'} • Total: $${sectionTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+                                        : '⚠️ No items - cannot generate invoice'
+                                    }
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn ${hasItems ? 'btn-success' : 'btn-disabled'}" 
+                                        onclick="${hasItems ? `generateAndDownloadSectionInvoice(${sectionIndex})` : `showCustomAlert('This section has no items. Please add items in the Items tab before generating an invoice.')`}" 
+                                        style="padding: 8px 16px; font-size: 14px; ${!hasItems ? 'background: #ccc; cursor: not-allowed;' : ''}">
+                                    📄 Download PDF
+                                </button>
+                                <button class="btn ${hasItems ? 'btn-coral' : 'btn-disabled'}" 
+                                        onclick="${hasItems ? `previewSectionInvoice(${sectionIndex})` : `showCustomAlert('This section has no items. Please add items in the Items tab before previewing an invoice.')`}" 
+                                        style="padding: 8px 16px; font-size: 14px; ${!hasItems ? 'background: #ccc; cursor: not-allowed;' : ''}">
+                                    👁️ Preview
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+                            ${hasItems ? section.items.map(item => {
+                                const customerPrice = item.customerPrice || item.price || 0;
+                                const total = (customerPrice * (item.qty || 1)) + (item.shipping || 0) + (item.tax || 0);
+                                return `
+                                    <div style="padding: 8px 12px; background: var(--section-bg); border-radius: 6px; font-size: 12px;">
+                                        <strong>${item.name}</strong><br>
+                                        <span style="color: var(--text-secondary);">Qty: ${item.qty || 1} • $${total.toFixed(2)}</span>
+                                    </div>
+                                `;
+                            }).join('') : `
+                                <div style="padding: 12px; text-align: center; color: var(--text-secondary); font-style: italic; grid-column: 1 / -1;">
+                                    No items in this section. <a href="#" onclick="showProjectSection('items', document.querySelector('.project-tab[onclick*=items]'))" style="color: var(--secondary-brand);">Add items here →</a>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function previewSectionInvoice(sectionIndex) {
+            if (!currentProject || !currentProject.sections || !currentProject.sections[sectionIndex]) {
+                showCustomAlert('Error: Section not found. Please refresh and try again.');
+                return;
+            }
+            
+            const section = currentProject.sections[sectionIndex];
+            
+            // Open preview in new window/tab
+            const previewWindow = window.open('', '_blank', 'width=900,height=800,scrollbars=yes,resizable=yes');
+            
+            if (!previewWindow) {
+                showCustomAlert('Pop-up blocked! Please allow pop-ups and try again.');
+                return;
+            }
+            
+            // Write the invoice HTML to the new window
+            previewWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Invoice Preview - ${currentProject.name} - ${section.name}</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+                    <style>
+                        body {
+                            font-family: 'Inter', Arial, sans-serif;
+                            margin: 0;
+                            padding: 20px;
+                            background: #f9f9f9;
+                            color: #333;
+                        }
+                        
+                        .container {
+                            max-width: 800px;
+                            margin: 0 auto;
+                            background: white;
+                            padding: 40px;
+                            border-radius: 12px;
+                            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                        }
+                        
+                        .no-print {
+                            background: #007bff;
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 6px;
+                            font-size: 16px;
+                            cursor: pointer;
+                            margin: 0 10px 20px 0;
+                        }
+                        
+                        .no-print:hover {
+                            background: #0056b3;
+                        }
+                        
+                        @media print {
+                            body { background: white; padding: 0; }
+                            .container { box-shadow: none; padding: 20px; margin: 0; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="no-print" style="text-align: center; margin-bottom: 30px;">
+                        <button class="no-print" onclick="window.print()">🖨️ Print Invoice</button>
+                        <button class="no-print" onclick="window.close()">✕ Close Preview</button>
+                    </div>
+                    
+                    <div class="container">
+                        ${generateCleanInvoiceHTML(sectionIndex)}
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            previewWindow.document.close();
+            previewWindow.focus();
+        }
+
+        function generateAndDownloadSectionInvoice(sectionIndex) {
+            if (!currentProject || !currentProject.sections || !currentProject.sections[sectionIndex]) {
+                showCustomAlert('Error: Section not found. Please refresh and try again.');
+                return;
+            }
+            
+            const section = currentProject.sections[sectionIndex];
+            
+            // Show loading message with better styling
+            const loadingAlert = document.createElement('div');
+            loadingAlert.id = 'pdf-loading';
+            loadingAlert.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--secondary-brand), var(--primary-brand));
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+            loadingAlert.innerHTML = `
+                <div style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                Generating PDF... Please wait
+            `;
+            
+            // Add spinner animation
+            if (!document.getElementById('spinner-style')) {
+                const style = document.createElement('style');
+                style.id = 'spinner-style';
+                style.textContent = `
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(loadingAlert);
+            
+            // Create a temporary element with the invoice HTML
+            const tempElement = document.createElement('div');
+            tempElement.innerHTML = generateCleanInvoiceHTML(sectionIndex);
+            tempElement.style.position = 'absolute';
+            tempElement.style.left = '-9999px';
+            tempElement.style.top = '-9999px';
+            document.body.appendChild(tempElement);
+            
+            // Configure PDF options
+            const filename = `Invoice-${currentProject.name.replace(/[^a-z0-9]/gi, '-')}-${section.name.replace(/[^a-z0-9]/gi, '-')}.pdf`;
+            const opt = {
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    letterRendering: true,
+                    logging: false
+                },
+                jsPDF: { 
+                    unit: 'in', 
+                    format: 'letter', 
+                    orientation: 'portrait',
+                    compress: true
+                },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+            
+            // Generate and download PDF
+            html2pdf()
+                .set(opt)
+                .from(tempElement)
+                .save()
+                .then(() => {
+                    // Clean up
+                    document.body.removeChild(tempElement);
+                    const loading = document.getElementById('pdf-loading');
+                    if (loading) document.body.removeChild(loading);
+                    
+                    // Show success message
+                    const successAlert = document.createElement('div');
+                    successAlert.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: linear-gradient(135deg, var(--success), var(--highlight));
+                        color: white;
+                        padding: 16px 24px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                        z-index: 10000;
+                        font-weight: 500;
+                    `;
+                    successAlert.innerHTML = '✅ Invoice PDF downloaded successfully!';
+                    document.body.appendChild(successAlert);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(successAlert)) {
+                            document.body.removeChild(successAlert);
+                        }
+                    }, 4000);
+                })
+                .catch((error) => {
+                    console.error('PDF generation failed:', error);
+                    document.body.removeChild(tempElement);
+                    const loading = document.getElementById('pdf-loading');
+                    if (loading) document.body.removeChild(loading);
+                    
+                    // Show error message
+                    const errorAlert = document.createElement('div');
+                    errorAlert.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: linear-gradient(135deg, var(--error), #E2A39D);
+                        color: white;
+                        padding: 16px 24px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                        z-index: 10000;
+                        font-weight: 500;
+                    `;
+                    errorAlert.innerHTML = '❌ Error generating PDF. Please try again or use the preview option.';
+                    document.body.appendChild(errorAlert);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(errorAlert)) {
+                            document.body.removeChild(errorAlert);
+                        }
+                    }, 5000);
+                });
+        }
+        
+        function generateCleanInvoiceHTML(sectionIndex) {
+            const section = currentProject.sections[sectionIndex];
+            let sectionTotal = 0;
+            let invoiceItems = [];
+            
+            // Generate items for this section only
+            section.items.forEach(item => {
+                const customerUnitPrice = item.customerPrice || item.price || 0;
+                const quantity = item.qty || 1;
+                const unitTotal = customerUnitPrice * quantity;
+                const totalWithShippingTax = unitTotal + (item.shipping || 0) + (item.tax || 0);
+                
+                invoiceItems.push({
+                    description: item.name,
+                    unitPrice: customerUnitPrice,
+                    qty: quantity,
+                    unitTotal: unitTotal,
+                    total: totalWithShippingTax
+                });
+                sectionTotal += totalWithShippingTax;
+            });
+            
+            return `
+                <div style="font-family: 'Inter', Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; background: white; color: #333;">
+                    <!-- Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 3px solid #D8A7A7; padding-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div style="width: 60px; height: 60px; background: #F2EFEB; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width: 40px; height: 40px;">
+                                    <g stroke="#333" stroke-width="6" fill="none">
+                                        <path d="M50 250 L50 150 L120 100 L190 150 L190 250 Z"/>
+                                        <path d="M210 250 L210 170 L280 120 L350 170 L350 250 Z"/>
+                                        <path d="M30 150 L120 90 L210 150"/>
+                                        <path d="M190 170 L280 110 L370 170"/>
+                                        <line x1="80" y1="130" x2="80" y2="250"/>
+                                        <line x1="160" y1="130" x2="160" y2="250"/>
+                                        <line x1="240" y1="150" x2="240" y2="250"/>
+                                        <line x1="320" y1="150" x2="320" y2="250"/>
+                                        <line x1="30" y1="250" x2="370" y2="250"/>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 style="margin: 0; font-size: 28px; font-weight: 600; color: #333; letter-spacing: 1px;">KELLY RAM DESIGNS</h1>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 16px; font-weight: 400;">INTERIOR DESIGN</p>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <h2 style="margin: 0; font-size: 42px; font-weight: 300; color: #333; letter-spacing: 4px;">INVOICE</h2>
+                        </div>
+                    </div>
+                    
+                    <!-- Client and Invoice Info -->
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
+                        <div style="width: 45%;">
+                            <div style="margin-bottom: 25px;">
+                                <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #333;">ISSUED TO:</h3>
+                                <div style="font-size: 15px; line-height: 1.5; color: #333;">
+                                    <strong>${currentProject.client}</strong><br>
+                                    ${currentProject.clientEmail ? currentProject.clientEmail + '<br>' : ''}
+                                    ${currentProject.clientPhone ? currentProject.clientPhone + '<br>' : ''}
+                                    ${currentProject.clientAddress ? currentProject.clientAddress.replace(/\n/g, '<br>') : ''}
+                                </div>
+                            </div>
+                            <div>
+                                <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #333;">PAY TO:</h3>
+                                <div style="font-size: 15px; color: #333;">
+                                    <strong>Kelly Ram Designs</strong><br>
+                                    kellyramdesigns@gmail.com
+                                </div>
+                            </div>
+                        </div>
+                        <div style="width: 45%; text-align: right;">
+                            <div style="font-size: 15px; line-height: 1.8;">
+                                <div><strong>PROJECT:</strong> ${currentProject.name}</div>
+                                <div><strong>SECTION:</strong> ${section.name}</div>
+                                <div><strong>INVOICE NO:</strong> ${currentProject.invoiceNumber || 'TBD'}-${sectionIndex + 1}</div>
+                                <div><strong>DATE:</strong> ${new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).replace(/\//g, '.')}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Items Table -->
+                    <table style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                        <thead>
+                            <tr style="background: #D3DCE6;">
+                                <th style="padding: 15px 12px; text-align: left; font-weight: 600; font-size: 14px; color: #333; border-bottom: 2px solid #9CAEC2;">DESCRIPTION</th>
+                                <th style="padding: 15px 12px; text-align: right; font-weight: 600; font-size: 14px; color: #333; border-bottom: 2px solid #9CAEC2;">UNIT PRICE</th>
+                                <th style="padding: 15px 12px; text-align: center; font-weight: 600; font-size: 14px; color: #333; border-bottom: 2px solid #9CAEC2;">QTY</th>
+                                <th style="padding: 15px 12px; text-align: right; font-weight: 600; font-size: 14px; color: #333; border-bottom: 2px solid #9CAEC2;">SUBTOTAL</th>
+                                <th style="padding: 15px 12px; text-align: right; font-weight: 600; font-size: 14px; color: #333; border-bottom: 2px solid #9CAEC2;">TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${invoiceItems.map((item, index) => `
+                                <tr style="border-bottom: 1px solid #EDEAE6;">
+                                    <td style="padding: 15px 12px; font-size: 14px; color: #333;">${item.description}</td>
+                                    <td style="padding: 15px 12px; text-align: right; font-size: 14px; color: #333;">$${item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                    <td style="padding: 15px 12px; text-align: center; font-size: 14px; color: #333;">${item.qty}</td>
+                                    <td style="padding: 15px 12px; text-align: right; font-size: 14px; color: #333;">$${item.unitTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                    <td style="padding: 15px 12px; text-align: right; font-size: 14px; font-weight: 600; color: #333;">$${item.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <!-- Tax/Shipping Note -->
+                    <div style="text-align: right; margin: 20px 0; padding: 12px 16px; background: #EDEAE6; border-radius: 6px; border-left: 4px solid #9CAEC2;">
+                        <p style="margin: 0; font-size: 13px; color: #666; font-style: italic;">
+                            * Total prices include applicable shipping and tax charges
+                        </p>
+                    </div>
+
+                    <!-- Total Section -->
+                    <div style="text-align: right; margin: 30px 0; padding: 25px; background: #F0E5D8; border-radius: 8px; border-top: 3px solid #D8A7A7;">
+                        <div style="font-size: 24px; font-weight: 700; color: #333;">
+                            SECTION TOTAL: $${sectionTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                    </div>
+
+                    <!-- Payment Info -->
+                    <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #EDEAE6; font-size: 14px; color: #666; line-height: 1.6;">
+                        <p style="margin: 0 0 12px 0;"><strong>Payment Options:</strong></p>
+                        <p style="margin: 0 0 8px 0;">• Zelle: kellyramdesigns@gmail.com</p>
+                        <p style="margin: 0 0 20px 0;">• Check payable to: Kelly Ram Designs</p>
+                        
+                        <p style="margin: 0 0 8px 0; font-size: 13px;"><strong>Please note:</strong> Most products are final sale and cannot be returned</p>
+                        <p style="margin: 0; font-size: 13px;">*All prices are subject to change</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateInvoiceHTML(sectionIndex) {
+            const section = currentProject.sections[sectionIndex];
+            let sectionTotal = 0;
+            let invoiceItems = [];
+            
+            // Generate items for this section only
+            section.items.forEach(item => {
+                const customerUnitPrice = item.customerPrice || item.price || 0;
+                const quantity = item.qty || 1;
+                const unitTotal = customerUnitPrice * quantity;
+                const totalWithShippingTax = unitTotal + (item.shipping || 0) + (item.tax || 0);
+                
+                invoiceItems.push({
+                    description: item.name,
+                    unitPrice: customerUnitPrice,
+                    qty: quantity,
+                    unitTotal: unitTotal,
+                    total: totalWithShippingTax
+                });
+                sectionTotal += totalWithShippingTax;
+            });
+            
+            // Get uploaded logo or use default house icon
+            const companyLogo = localStorage.getItem('companyLogo');
+            const logoSection = companyLogo ? 
+                `<img src="${companyLogo}" style="width: 60px; height: 60px; border-radius: 8px; object-fit: contain;">` :
+                `<div style="width: 60px; height: 60px; background: #F2EFEB; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(51,51,51,0.1);">
+                    <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width: 40px; height: 40px;">
+                        <g stroke="#333" stroke-width="6" fill="none">
+                            <path d="M50 250 L50 150 L120 100 L190 150 L190 250 Z"/>
+                            <path d="M210 250 L210 170 L280 120 L350 170 L350 250 Z"/>
+                            <path d="M30 150 L120 90 L210 150"/>
+                            <path d="M190 170 L280 110 L370 170"/>
+                            <line x1="80" y1="130" x2="80" y2="250"/>
+                            <line x1="160" y1="130" x2="160" y2="250"/>
+                            <line x1="240" y1="150" x2="240" y2="250"/>
+                            <line x1="320" y1="150" x2="320" y2="250"/>
+                            <line x1="30" y1="250" x2="370" y2="250"/>
+                        </g>
+                    </svg>
+                </div>`;
+            
+            return `<!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Invoice - ${currentProject.name} - ${section.name}</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+                    
+                    body {
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        margin: 0;
+                        padding: 30px;
+                        background: white;
+                        color: #333;
+                        line-height: 1.6;
+                    }
+                    
+                    .invoice-container {
+                        max-width: 800px;
+                        margin: 0 auto;
+                    }
+                    
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 20px 0;
+                    }
+                    
+                    th, td {
+                        padding: 15px;
+                        text-align: left;
+                        border-bottom: 1px solid #EDEAE6;
+                    }
+                    
+                    th {
+                        background: #D3DCE6;
+                        color: #333;
+                        font-weight: 600;
+                    }
+                    
+                    @media print {
+                        body { margin: 0; padding: 20px; }
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="invoice-container">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #D8A7A7; padding-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            ${logoSection}
+                            <div>
+                                <h2 style="margin: 0; color: #333;">KELLY RAM DESIGNS</h2>
+                                <p style="margin: 5px 0; color: #666;">INTERIOR DESIGN</p>
+                            </div>
+                        </div>
+                        <div style="font-size: 36px; font-weight: 200; color: #333; letter-spacing: 3px;">INVOICE</div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
+                        <div>
+                            <div style="margin-bottom: 20px;">
+                                <strong>ISSUED TO:</strong><br>
+                                ${currentProject.client}<br>
+                                ${currentProject.clientEmail ? currentProject.clientEmail + '<br>' : ''}
+                                ${currentProject.clientPhone ? currentProject.clientPhone + '<br>' : ''}
+                                ${currentProject.clientAddress ? currentProject.clientAddress.replace(/\n/g, '<br>') : ''}
+                            </div>
+                            <div>
+                                <strong>PAY TO:</strong><br>
+                                Kelly Ram Designs
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="margin-bottom: 10px;">
+                                <strong>PROJECT:</strong> ${currentProject.name}
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <strong>SECTION:</strong> ${section.name}
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <strong>INVOICE NO:</strong> ${currentProject.invoiceNumber || 'TBD'}-${sectionIndex + 1}
+                            </div>
+                            <div>
+                                <strong>DATE:</strong> ${new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).replace(/\//g, '.')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>DESCRIPTION</th>
+                                <th>UNIT PRICE</th>
+                                <th>QTY</th>
+                                <th>SUBTOTAL</th>
+                                <th>TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${invoiceItems.map(item => `
+                                <tr>
+                                    <td>${item.description}</td>
+                                    <td>$${item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                    <td>${item.qty}</td>
+                                    <td>$${item.unitTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                    <td>$${item.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <div style="text-align: right; margin-top: 10px; margin-bottom: 20px; padding: 10px 15px; background: #EDEAE6; border-radius: 8px; border-left: 4px solid #9CAEC2;">
+                        <p style="margin: 0; font-size: 13px; color: #666; font-style: italic;">
+                            * Total prices include applicable shipping and tax charges
+                        </p>
+                    </div>
+
+                    <div style="text-align: right; margin-top: 30px; padding: 25px; background: #F0E5D8; border-radius: 12px;">
+                        <div style="font-weight: 600; font-size: 24px; color: #333; padding-top: 15px; border-top: 2px solid #D8A7A7;">
+                            <strong>SECTION TOTAL: $${sectionTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #EDEAE6; color: #666; font-size: 14px;">
+                        <p>Payment can be sent via Zelle to kellyramdesigns@gmail.com or check to Kelly Ram Designs</p>
+                        <p style="margin-top: 20px;">Please note: Most products are final sale and cannot be returned</p>
+                        <p>*All prices are subject to change</p>
+                    </div>
+                </div>
+            </body>
+            </html>`;
+        }
+
         function generateProjectInvoice() {
             if (!currentProject) return;
             
@@ -1895,13 +2629,19 @@
             if (currentProject.sections) {
                 currentProject.sections.forEach(section => {
                     section.items.forEach(item => {
+                        const customerUnitPrice = item.customerPrice || item.price || 0;
+                        const quantity = item.qty || 1;
+                        const unitTotal = customerUnitPrice * quantity;
+                        const totalWithShippingTax = unitTotal + (item.shipping || 0) + (item.tax || 0);
+                        
                         invoiceItems.push({
                             description: `${item.name} (${section.name})`,
-                            price: item.price,
-                            qty: item.qty,
-                            total: item.price * item.qty
+                            unitPrice: customerUnitPrice,
+                            qty: quantity,
+                            unitTotal: unitTotal,
+                            total: totalWithShippingTax
                         });
-                        projectTotal += item.price * item.qty;
+                        projectTotal += totalWithShippingTax;
                     });
                 });
             }
@@ -1970,6 +2710,7 @@
                             <th style="padding: 15px; text-align: left; color: var(--text-primary);">DESCRIPTION</th>
                             <th style="padding: 15px; text-align: left; color: var(--text-primary);">UNIT PRICE</th>
                             <th style="padding: 15px; text-align: left; color: var(--text-primary);">QTY</th>
+                            <th style="padding: 15px; text-align: left; color: var(--text-primary);">SUBTOTAL</th>
                             <th style="padding: 15px; text-align: left; color: var(--text-primary);">TOTAL</th>
                         </tr>
                     </thead>
@@ -1977,13 +2718,20 @@
                         ${invoiceItems.map(item => `
                             <tr>
                                 <td style="padding: 15px; border-bottom: 1px solid var(--section-bg);">${item.description}</td>
-                                <td style="padding: 15px; border-bottom: 1px solid var(--section-bg);">$${item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                <td style="padding: 15px; border-bottom: 1px solid var(--section-bg);">$${item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                 <td style="padding: 15px; border-bottom: 1px solid var(--section-bg);">${item.qty}</td>
+                                <td style="padding: 15px; border-bottom: 1px solid var(--section-bg);">$${item.unitTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                 <td style="padding: 15px; border-bottom: 1px solid var(--section-bg);">$${item.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             </tr>
                         `).join('')}
                     </tbody>
                 </table>
+                
+                <div style="text-align: right; margin-top: 10px; margin-bottom: 20px; padding: 10px 15px; background: var(--section-bg); border-radius: 8px; border-left: 4px solid var(--info);">
+                    <p style="margin: 0; font-size: 13px; color: var(--text-secondary); font-style: italic;">
+                        * Total prices include applicable shipping and tax charges
+                    </p>
+                </div>
 
                 <div style="text-align: right; margin-top: 30px; padding: 25px; background: var(--warm-cream); border-radius: 12px;">
                     <div style="margin: 10px 0; font-size: 16px; color: var(--text-primary);"><strong>PRODUCT TOTAL: $${projectTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div>
@@ -2626,6 +3374,9 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Migrate old project data format
+            migrateOldProjects();
+            
             document.getElementById('startDate').valueAsDate = new Date();
             // Removed hours form initialization since Hours section was removed
             
